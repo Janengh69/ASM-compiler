@@ -1,27 +1,27 @@
-
-DATA SEGMENT use 16
-	VB		db	111111b
-	VD		dd	0d34dah		;865 498
-	VW		dw	6d
-	String	db	"DoroshKaruna"
-	str		db 	"A"
+DATA SEGMENT
+	VB		DB	111111b
+	VD		DD	0d34dah
+	VW		DW	5d
+	Stringd	DB	"DoroshKaruna"
+	stri	DB 	"A"
 DATA ENDS
 	
-CODE SEGMENT use 16
-ASSUME cs:CODE, ds:DATA, es:DATA
-	mov ax, DATA
-	mov ds, ax
-	mov es, ax
+CODE SEGMENT
 	mov bl, 11000b
-	and [VB], bl		;direct adressing
-	or	VB, 110			;11110b
-		
+EXMPL MACRO 	
+	and VB, bl		;direct adressing
+	or	VB, 110	
+ENDM  
+EXMPL
 	mov ax, 0d5h
-	dec word ptr VD[si]			;0d34d9h basic adressing
-	add word ptr VD, ax			;0eO9feh
-	
-	lea si, String
-	lea di, str
+	dec word ptr GS:[si+1]			;basic adressing
+	add word ptr VD, ax			
+EXMPL2 MACRO NUM
+	inc NUM
+ENDM	
+EXMPL2 6
+	mov si, offset String
+	mov di, offset stri
 	
 	mov ax, 0
 	mov cx, 8
