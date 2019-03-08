@@ -1,4 +1,7 @@
 import re
+<<<<<<< HEAD
+import Common as Com
+=======
 
 SYMBOLS = [ '[', ']', '.', ',', '_', '@','+', '-', ':']
 COMANDS = [ "MOV", "ADD", "DEC", "CMP", "AND", "OR", "INC", "JGE", "MOVSW"]
@@ -8,11 +11,15 @@ REGISTER8 = ['AH', 'BH', 'CH', 'DH', 'AL', 'BL', 'CL', 'DL']
 
 def error( msg):
     print ('Lexer error: ', msg)
+>>>>>>> 8c67715e442b97323116fa135e2681de56b73199
 
 def AsmFileToList(filename):
     file = open(filename, "r")
     programm = list()
+<<<<<<< HEAD
+=======
     flag = False
+>>>>>>> 8c67715e442b97323116fa135e2681de56b73199
     for line in file:
         match = ''.join(re.findall("[a-zA-Z0-9:;+\" ' ',. '\t' @ \[ \]]", line))
         if match.find(',') != -1:
@@ -37,31 +44,51 @@ def AsmFileToList(filename):
     return programm
 
 def check_is_comand(word):
+<<<<<<< HEAD
+    for temp in Com.COMANDS:
+=======
     for temp in COMANDS:
+>>>>>>> 8c67715e442b97323116fa135e2681de56b73199
         if word.upper() == temp:
             return True
     return False
 
 def check_is_symbol(word):
+<<<<<<< HEAD
+    for temp in Com.SYMBOLS:
+=======
     for temp in SYMBOLS:
+>>>>>>> 8c67715e442b97323116fa135e2681de56b73199
         if word == temp:
             return True
     return False
 
 def check_is_directive(word):
+<<<<<<< HEAD
+    for temp in Com.DIRECTIVE:
+=======
     for temp in DIRECTIVE:
+>>>>>>> 8c67715e442b97323116fa135e2681de56b73199
         if word.upper() == temp:
             return True
     return False
 
 def check_is_register8(word):
+<<<<<<< HEAD
+    for temp in Com.REGISTER8:
+=======
     for temp in REGISTER8:
+>>>>>>> 8c67715e442b97323116fa135e2681de56b73199
         if word.upper() == temp:
             return True
     return False
 
 def check_is_register16(word):
+<<<<<<< HEAD
+    for temp in Com.REGISTER16:
+=======
     for temp in REGISTER16:
+>>>>>>> 8c67715e442b97323116fa135e2681de56b73199
         if word.upper() == temp:
             return True
     return False
@@ -101,9 +128,16 @@ def list_to_table(lst):
             elif i == ''.join(re.findall(r'[/"\w/"]+', i)):
                 row = [ i, "TEXTCONST", len(i)] 
             elif i == ''.join(re.findall(r'[@][a-z]+[0-9]+', i)) and not flag:
+<<<<<<< HEAD
+                row = [ i, "LABLE", len(i)]
+            elif(not row): continue
+            result.append(row)
+            flag = False
+=======
                 row = [ i, "MITKA", len(i)]
             elif(not row): continue
             result.append(row)
             flag = False
     #output(result)
+>>>>>>> 8c67715e442b97323116fa135e2681de56b73199
     return(result)
