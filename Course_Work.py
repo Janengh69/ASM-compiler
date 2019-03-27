@@ -1,10 +1,12 @@
 import LexicalAnalyser as Lex
+import Common as Com
+import SyntaxAnalyser as Syn
 
 def main():
-<<<<<<< HEAD
     Com.table = Lex.list_to_table(Lex.AsmFileToList("test_programm.asm"))
-=======
-    table = Lex.list_to_table(Lex.AsmFileToList("test_programm.asm"))
->>>>>>> 8c67715e442b97323116fa135e2681de56b73199
-    Lex.output(table)
+#    Lex.macro_search(Com.table)
+    Lex.insert_macro(Com.table)
+
+    #Lex.output(table)
+    Syn.syntax_check(Com.table)
 main()
