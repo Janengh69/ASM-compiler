@@ -44,8 +44,10 @@ def syntax_check(lex_list):
        list_print(i)
        row_print(table[pos], lex_list, pos)
        pos += 1  
+
       # print(table[pos])
-    sentences_syntax_print(table)
+    #sentences_syntax_print(table)
+   
 def sentences_syntax_print(table):
         print('\n')
         print('LABELS,ID        MNEM             1 OPERAND            2 OPERAND      ')
@@ -64,8 +66,10 @@ def sentences_syntax_print(table):
 
 def row_print(i, lex_list, pos):
     print(lex_list[pos])
+   
+    print('LABELS,ID           MNEM                  1 OPERAND              2 OPERAND      ')
     print('----------------------------------------------------------------------------')
-    print('   №LEX    1st  lex        №       1st lex       №       1st lex        №')
+    print('   №LEX      1st  lex    quantity    1st lex   quantity     1st lex   quantity')
     print('----------------------------------------------------------------------------')
     for j in i:
         if(j == []):
@@ -79,3 +83,29 @@ def list_print(i):
             continue
         print (j[0], " ", end ='')
     print()
+
+def instruction_analysis():
+#    operand_lexem = list()
+#    pos = abs
+#    for row in Com.table:
+#        if row[0][1] == "MNEM":
+#            for i in range(1, len(row)):
+#                operand_lexem.append([])
+#                if row[i][1] == "REGISTER16":
+
+    # 1 - reg
+    # 2 - ptr
+    # 3 - segment id
+    # 4 - user id, label
+    # 5 - addr reg
+    # 6 - const
+
+    Com.operands.append([[],[]])
+    Com.operands[i][0].append([False, False, False, False, False, False])
+    Com.operands[i][0].append(['', '', '', '', '',''])
+    Com.operands[i][0].append(['', '', '', '', '',''])
+    Com.operands[i][1].append([False, False, False, False, False, False])
+    Com.operands[i][1].append(['', '', '', '', '',''])
+    Com.operands[i][1].append(['', '', '', '', '',''])
+
+
