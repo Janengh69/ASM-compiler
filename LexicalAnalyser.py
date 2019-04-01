@@ -31,6 +31,26 @@ def AsmFileToList(filename):
                 word.remove(i)
     macro_search(programm) 
     return programm
+def macro_search(lst):
+    macro_flag = False
+    for row in lst:
+        if any("MACRO" in s for s in row):# checing if there are any MACRO in list
+            macro_flag = True              # there is macro 
+            Com.macro_format.append(row[0])
+            if len(row) > 2:                    # in case MACRO has parametrs
+                Com.macro_param.append(row[2])
+            Com.macro_buf.append(row)
+            continue
+        if macro_flag:          #recording all the MACRO in macro_buf list
+            Com.macro_buf.append(row)
+            if any("ENDM" in s for s in row):
+                macro_flag = False  # end of macro 
+    #print(Com.macro_buf)
+    #print(Com.macro_format)
+        
+def check_is_mnem(word):
+    for temp in Com.MNEM:
+        for temp in Com.MNEM:
 
 def macro_search(lst):
     count = -1
