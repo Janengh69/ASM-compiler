@@ -7,6 +7,7 @@ REGISTER8 = ['AH', 'BH', 'CH', 'DH', 'AL', 'BL', 'CL', 'DL']
 SEGMENT = [ "ENDS","SEGMENT",'END']
 MACRO = [ "MACRO", "ENDM" ]
 ID_SEGMENT = ["GS", "ES", "FS", "DS", "CS", "SS"]
+
 table = list()
 macro_buf = list()
 macro_format = list()

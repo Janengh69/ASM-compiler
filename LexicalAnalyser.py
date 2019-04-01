@@ -31,26 +31,6 @@ def AsmFileToList(filename):
                 word.remove(i)
     macro_search(programm) 
     return programm
-def macro_search(lst):
-    macro_flag = False
-    for row in lst:
-        if any("MACRO" in s for s in row):# checing if there are any MACRO in list
-            macro_flag = True              # there is macro 
-            Com.macro_format.append(row[0])
-            if len(row) > 2:                    # in case MACRO has parametrs
-                Com.macro_param.append(row[2])
-            Com.macro_buf.append(row)
-            continue
-        if macro_flag:          #recording all the MACRO in macro_buf list
-            Com.macro_buf.append(row)
-            if any("ENDM" in s for s in row):
-                macro_flag = False  # end of macro 
-    #print(Com.macro_buf)
-    #print(Com.macro_format)
-        
-def check_is_mnem(word):
-    for temp in Com.MNEM:
-        for temp in Com.MNEM:
 
 def macro_search(lst):
     count = -1
@@ -68,8 +48,9 @@ def macro_search(lst):
         if macro_flag:      #recording all the MACRO in macro_buf list
             if any("ENDM" in s for s in row):
                 macro_flag = False 
+        if macro_flag:
             Com.macro_buf[count].append(row)  # end of macro 
-   # print(Com.macro_buf)
+    print(Com.macro_buf)
    # print(Com.macro_format)
    # print(Com.macro_param)
         
@@ -220,8 +201,11 @@ def list_to_table(lst):
             flag = False
             user_macro = False
         pos +=1
-    print(result)
+   # print(result)
+    result = [x for x in result if x != []] #clearing empty lists 
     return(result)
+
+
 
 def macro_to_lex(lst):
     result = list() 
@@ -286,5 +270,5 @@ def macro_to_lex(lst):
             flag = False
         else: 
             continue
-    print(result)
+   # print(result)
     return(result)
