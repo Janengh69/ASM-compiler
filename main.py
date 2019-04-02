@@ -6,7 +6,6 @@ import SyntaxAnalyser as Syn
 def main():
     syntax_table = list()
     Com.lex_table = Lex.list_to_table(Lex.AsmFileToList("test_programm.asm"))
-    print(Com.lex_table)
    # print(Com.table)
     #Com.table = Lex.AsmFileToList("test_programm.asm")
     #Lex.macro_search(Com.table)
@@ -17,6 +16,7 @@ def main():
     syntax_table = Syn.syntax_check(Com.lex_table)
     for i in range(len(Com.lex_table)):
         Syn.instruction_analysis(Com.lex_table[i], i, syntax_table[i])
+
     #print(syntax_table)
     #Gramm.instruction_analysis()
 main()

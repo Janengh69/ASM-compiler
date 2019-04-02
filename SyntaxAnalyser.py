@@ -1,5 +1,4 @@
 import Common as Com
-error_flags = list()
 def syntax_check(lex_list):
     table = list()
     pos = 0
@@ -14,7 +13,7 @@ def syntax_check(lex_list):
             if not i[j]:
                 continue
             if(i[j] and'UNDEFINED' in i[j][1] ):
-                error_flags.append([pos+1, (i[j][1].index('UNDEFINED'))+1])
+                Com.error_flags.append([pos+1, (i[j][1].index('UNDEFINED'))+1])
                 pos += 1
                 continue
             if((j == 0 and i[j][1] == 'USER') or (j == 0 and i[j][1] == 'USER_MACRO') or (j != len(i)-1 and i[j][1] == 'USER' and i[j+1][0] == ':')):
@@ -29,7 +28,7 @@ def syntax_check(lex_list):
                     count += 1
                     continue
                 elif(table[pos][0] == [] and table[pos][1] == []):
-                    error_flags.append([pos+1, j+1])
+                    Com.error_flags.append([pos+1, j+1])
                     break
                 elif(len(table[pos]) == 2):
                     table[pos].append([count, 0])
@@ -38,12 +37,13 @@ def syntax_check(lex_list):
                     fl = 3
                 table[pos][fl][1] += 1
             else:
-                error_flags.append([pos+1, j+1])
+                Com.error_flags.append([pos+1, j+1])
                 break
             count += 1
        list_print(i)
        row_print(table[pos], lex_list, pos)
-       pos += 1  
+       pos += 1 
+    return table
 
       # print(table[pos])
     #sentences_syntax_print(table)
@@ -62,7 +62,7 @@ def sentences_syntax_print(table):
                     print('     %d     ' % (k), sep ='', end ='')
             print()
         
-        print('Error flags:', error_flags)
+        print('Error flags:', Com.error_flags)
 
 def row_print(i, lex_list, pos):
     print(lex_list[pos])
@@ -84,7 +84,7 @@ def list_print(i):
         print (j[0], " ", end ='')
     print()
 
-def instruction_analysis():
+def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analysis
 #    operand_lexem = list()
 #    pos = abs
 #    for row in Com.table:
@@ -99,7 +99,6 @@ def instruction_analysis():
     # 4 - user id, label
     # 5 - addr reg
     # 6 - const
-
     Com.operands.append([[],[]])
     Com.operands[i][0].append([False, False, False, False, False, False])
     Com.operands[i][0].append(['', '', '', '', '',''])
@@ -107,5 +106,85 @@ def instruction_analysis():
     Com.operands[i][1].append([False, False, False, False, False, False])
     Com.operands[i][1].append(['', '', '', '', '',''])
     Com.operands[i][1].append(['', '', '', '', '',''])
+    error_flag = True
+    if len(syn) > 2: 
+        if lst[0][1] == "MNEM":
+            print(len(syn))
+            for j in range(1, len(syn)):
+                place = syn[j][0]
+                if place >= len(lst):
+                    place-=1
+                if lst[place][1] == "SYMBOL":
+                    continue
+                #if it contains register (1 row)
+                if lst[place][1] == "REGISTER16":
+                     Com.operands[i][j-2][0][0] = True
+                     Com.operands[i][j-2][1][0] = 16
+                     for com in range(len(Com.REGISTER16)):
+                         if lst[place][0] == Com.REGISTER16[com]:
+                             Com.operands[i][j-2][2][0] = com
+                             error_flag = False
+                             break
+                     if error_flag:                         #to check
+                         Com.error_flags.append([i][place])
+                         return
+                elif lst[place][1] == "REGISTER8":
+                     Com.operands[i][j-2][0][0] = True
+                     Com.operands[i][j-2][1][0] = 8
+                     for com in range(len(Com.REGISTER8)):
+                         if lst[place][0] == Com.REGISTER8[com]:
+                             Com.operands[i][j-2][2][0] = com
+                             error_flag = False
+                             break
+                     if error_flag:                 
+                         Com.error_flags.append([i][place])
+                         return
+                #if it contains label or user id (4 column)
+                elif lst[place][1] == "USER":
+                    for k in range(len(Com.user_list)):
+                        if Com.user_list[k] == lst[place][0]:
+                            Com.operands[i][j-2][0][3] = True
+                            Com.operands[i][j-2][1][3] = k
+                elif syn[j][1] > 1:    
+                    #if it contains ptr (2 column) 
+                    if lst[place][0] == "PTR":#to check
+                        for k in range(4,len(Com.DIRECTIVE)):
+                            if lst[place-1][0] == Com.DIRECTIVE[k]:
+                                Com.operands[i][j-2][0][1] = True
+                                Com.operands[i][j-2][1][1] = Com.DIRECTIVE[k]
+                    #if it contains segment prefix (3 column)
+                    for k in range(len(Com.ID_SEGMENT)):
+                        if Com.DIRECTIVE[k] == lst[place][0]:
+                            Com.operands[i][j-2][0][2] = True
+                            Com.operands[i][j-2][1][2] = Com.NUMBERS_FOR_REG[k]
+                            break
+                    left = right = 0
+                    for k in range(len(syn), len(lst)):
+                        if lst[k][0] == "[":
+                            error_flag = True
+                            left = k
+                        if lst[k][0] == "]" and error_flag:
+                            error_flag = False
+                            right = k
+                            break
+                    if len(lst)-1 != right or error_flag:
+                        Com.error_flags.append([i][right])
+                        return
+                    counter = 0
+                    for k in range(left,right+1):
+                        if lst[k][1] == "REGISTER16": 
+                            Com.operands[i][j-2][0][4] = True
+                            Com.operands[i][j-2][1][4] = Com.NUMBERS_FOR_REG[counter]
+                        elif lst[k][1] == "REGISTER8":
+                            Com.operands[i][j-2][0][4] = True
+                            Com.operands[i][j-2][1][4] = Com.NUMBERS_FOR_REG[counter]
+                        counter +=1
+                #if it has const (6 column)
+                elif lst[place][1] == "NUMBER":
+                    Com.operands[i][j-2][0][5] = True
+                    Com.operands[i][j-2][1][5] = lst[place][0]
+                
+    print(Com.operands[i])
+    print()
 
 

@@ -1,9 +1,6 @@
 import re
 import Common as Com
 
-def error( msg):
-    print ('Lexer error: ', msg)
-
 def AsmFileToList(filename):
     file = open(filename, "r")
     programm = list()
@@ -119,7 +116,9 @@ def output(list1):
         print()
 
 def list_to_table(lst):
+    print(lst)
     result = list() 
+    user_list = set()
     pos = 0
     user_macro = False
     flag = False
@@ -182,14 +181,20 @@ def list_to_table(lst):
                         row = [word[i].upper(), "USER_MACRO", len(word[i])]
                         user_marco = True
                         break
-                    if not user_macro:
+                if not user_macro:
+                    if Com.macro_param:
                         for param in Com.macro_param:
                             if word[i].upper() == param:
                                 row = [ word[i].upper(), "USER_MACRO_PARAM", len(word[i])]
                                 break
                             else:
-                                row = [ word[i].upper(), "USER", len(word[i])]
+                                row = [word[i].upper(), "USER", len(word[i])]
+                                user_list.add(word[i])      #set not to allow names repeating
                                 user_macro = False
+                    else:
+                        row = [word[i].upper(), "USER", len(word[i])]
+                        user_list.add(word[i])      #set not to allow names repeating
+                        user_macro = False
             elif word[i][0] == '"' and word[i][len(word[i])-1] == '"' and not flag: 
                  word[i] = ''.join(re.findall(r'[\"A-Z|a-z|\d+\"]', word[i]))
                  row = [ word[i], "TEXTCONST", len(word[i])]
@@ -203,6 +208,8 @@ def list_to_table(lst):
         pos +=1
    # print(result)
     result = [x for x in result if x != []] #clearing empty lists 
+    Com.user_list = list(user_list)
+    print(result)
     return(result)
 
 

@@ -14,7 +14,7 @@ EXMPL MACRO
 	or	VB, 110	
 ENDM  
 EXMPL
-	mov ax, 0d5h
+	mov ax, 0d5h	
 	dec word ptr GS:[si+1]			
 	add word ptr VD, ax			
 EXMPL2 MACRO NUM
