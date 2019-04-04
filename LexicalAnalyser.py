@@ -1,5 +1,6 @@
 import re
 import Common as Com
+import sys
 
 def AsmFileToList(filename):
     file = open(filename, "r")
@@ -26,6 +27,10 @@ def AsmFileToList(filename):
         for i in word:
             if i == '':
                 word.remove(i)
+    for word in programm: # deleting extra empty lists
+        for i in word:
+            if i == '':
+                word.remove(i)
     macro_search(programm) 
     return programm
 
@@ -47,7 +52,7 @@ def macro_search(lst):
                 macro_flag = False 
         if macro_flag:
             Com.macro_buf[count].append(row)  # end of macro 
-    print(Com.macro_buf)
+    #print(Com.macro_buf)
    # print(Com.macro_format)
    # print(Com.macro_param)
         
@@ -116,10 +121,11 @@ def output(list1):
         print()
 
 def list_to_table(lst):
-    print(lst)
     result = list() 
     user_list = set()
     pos = 0
+    count_macro = 0
+    count = 0
     user_macro = False
     flag = False
     param_flag = True
@@ -145,9 +151,21 @@ def list_to_table(lst):
                 flag = True
             elif check_is_segment(word[i]):
                 row = [ word[i].upper(), "SEGMENT", len(word[i])]
+                count+=1
+
+                if len(word) == 1 and word[i].upper() != "END":             # in case user forgot to name segment
+                    Com.error_flags.append([pos - count_macro, i])
+                
+                if count == 2 and word[i].upper() == "END" or count == 2 and word[i].upper() != "ENDS": #in case user forgot to close segment
+                    Com.error_flags.append([pos-count_macro, i])
+                    #sys.exit(1)
+                if count == 2: 
+                    count = 0
                 flag = True
             elif check_is_symbol(word[i]):
                 row = [ word[i], "SYMBOL", len(word[i])]
+                if len(word) == 1:
+                    Com.error_flags.append([pos-count_macro, i])
                 flag = True
             elif check_is_register8(word[i]):
                 row = [ word[i].upper(), "REGISTER8", len(word[i])]
@@ -177,6 +195,7 @@ def list_to_table(lst):
                                                 rw[0] = param.upper()
                                         result.append(row)
                                         pos+=1
+                                        count_macro +=1
                             break
                         row = [word[i].upper(), "USER_MACRO", len(word[i])]
                         user_marco = True
@@ -209,7 +228,6 @@ def list_to_table(lst):
    # print(result)
     result = [x for x in result if x != []] #clearing empty lists 
     Com.user_list = list(user_list)
-    print(result)
     return(result)
 
 

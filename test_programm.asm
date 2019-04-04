@@ -6,6 +6,7 @@ DATA SEGMENT
 	stri	DB 	"A"
 DATA ENDS
 CODE SEGMENT
+	,
 	mov bl, 11000b
 	cmp bl, VB
 	jge label2

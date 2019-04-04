@@ -159,16 +159,18 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                             Com.operands[i][j-2][1][2] = Com.NUMBERS_FOR_REG[k]
                             break
                     left = right = 0
+                    gaps = False
                     for k in range(len(syn), len(lst)):
                         if lst[k][0] == "[":
-                            error_flag = True
+                            gaps = True
                             left = k
-                        if lst[k][0] == "]" and error_flag:
-                            error_flag = False
+                        if lst[k][0] == "]" and gaps:
+                            gaps = False
                             right = k
                             break
-                    if len(lst)-1 != right or error_flag:
-                        Com.error_flags.append([i][right])
+                    if len(lst)-1 != right or gaps:
+                        gaps = False
+                        Com.error_flags.append([i,right]) #to do: wrong index for right bracket
                         return
                     counter = 0
                     for k in range(left,right+1):
@@ -178,6 +180,9 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         elif lst[k][1] == "REGISTER8":
                             Com.operands[i][j-2][0][4] = True
                             Com.operands[i][j-2][1][4] = Com.NUMBERS_FOR_REG[counter]
+                        elif lst[k][1] == "NUMBER":
+                            Com.operands[i][j-2][0][5] = True
+                            Com.operands[i][j-2][1][5] = lst[k][0]
                         counter +=1
                 #if it has const (6 column)
                 elif lst[place][1] == "NUMBER":
