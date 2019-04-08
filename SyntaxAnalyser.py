@@ -13,22 +13,21 @@ def syntax_check(lex_list):
             if not i[j]:
                 continue
             if(i[j] and'UNDEFINED' in i[j][1] ):
-                Com.error_flags.append([pos+1, (i[j][1].index('UNDEFINED'))+1])
+                Com.error_flags.append([pos+1, (i[j][1].index('UNDEFINED'))+1])         #in case we meet underfined world
+                print("underfined")
                 pos += 1
                 continue
-            if((j == 0 and i[j][1] == 'USER') or (j == 0 and i[j][1] == 'USER_MACRO') or (j != len(i)-1 and i[j][1] == 'USER' and i[j+1][0] == ':')):
-                #if j == 0 and i[j][1] == 'USER_MACRO':
-                #    if len(i) == 1 :
-                #        i[j]    .insert(j, Com.macro_buf)
+            if((j == 0 and i[j][1] == 'USER') or (j == 0 and i[j][1] == 'USER_MACRO') or i[j][1] == 'SEGMENT_USER' or (j != len(i)-1 and i[j][1] == 'USER' and i[j+1][0] == ':')): 
                 table[pos][0] = [count] 
             elif(len(table[pos]) != 3 and table[pos][1] == [] and (i[j][1] == 'MACRO' or i[j][1] == 'MNEM' or i[j][1] == 'SEGMENT' or i[j][1] == 'DIRECTIVE')):
                 table[pos][1] = [count, 1]
-            elif( i[j][1] == 'DIRECTIVE' or i[j][1] == 'SYMBOL' or i[j][1] == 'USER' or i[j][1] == 'USER_MACRO' or i[j][1] == 'USER_MACRO_PARAM' or i[j][1] == 'ID_SEGMENT' or i[j][1] == 'REGISTER16' or i[j][1] == 'REGISTER8' or i[j][1] == 'TEXTCONST' or i[j][1] == 'NUMBER'):
+            elif( i[j][1] == 'DIRECTIVE' or i[j][1] == 'SYMBOL' or i[j][1] == 'USER' or i[j][1] == 'USER_MACRO' or i[j][1] == 'USER_MACRO_PARAM' or i[j][1] == 'ID_SEGMENT' or i[j][1] == 'SEGMENT_USER' or i[j][1] == 'REGISTER16' or i[j][1] == 'REGISTER8' or i[j][1] == 'TEXTCONST' or i[j][1] == 'NUMBER'):
                 if((i[j][0] == ':' and table[pos][0] != []) or i[j][0] == ','):
                     count += 1
                     continue
                 elif(table[pos][0] == [] and table[pos][1] == []):
                     Com.error_flags.append([pos+1, j+1])
+                    print("empty")
                     break
                 elif(len(table[pos]) == 2):
                     table[pos].append([count, 0])
@@ -38,14 +37,13 @@ def syntax_check(lex_list):
                 table[pos][fl][1] += 1
             else:
                 Com.error_flags.append([pos+1, j+1])
+                print("meh")
                 break
             count += 1
-       list_print(i)
-       row_print(table[pos], lex_list, pos)
+       #list_print(i)
+       #row_print(table[pos], lex_list, pos)
        pos += 1 
     return table
-
-      # print(table[pos])
     #sentences_syntax_print(table)
    
 def sentences_syntax_print(table):
@@ -85,14 +83,6 @@ def list_print(i):
     print()
 
 def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analysis
-#    operand_lexem = list()
-#    pos = abs
-#    for row in Com.table:
-#        if row[0][1] == "MNEM":
-#            for i in range(1, len(row)):
-#                operand_lexem.append([])
-#                if row[i][1] == "REGISTER16":
-
     # 1 - reg
     # 2 - ptr
     # 3 - segment id
@@ -109,7 +99,6 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
     error_flag = True
     if len(syn) > 2: 
         if lst[0][1] == "MNEM":
-            print(len(syn))
             for j in range(1, len(syn)):
                 place = syn[j][0]
                 if place >= len(lst):
@@ -138,6 +127,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                              break
                      if error_flag:                 
                          Com.error_flags.append([i][place])
+                         print("not register")
                          return
                 #if it contains label or user id (4 column)
                 elif lst[place][1] == "USER":
@@ -145,7 +135,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         if Com.user_list[k] == lst[place][0]:
                             Com.operands[i][j-2][0][3] = True
                             Com.operands[i][j-2][1][3] = k
-                elif syn[j][1] > 1:    
+                elif syn[j][1] > 1:  
                     #if it contains ptr (2 column) 
                     if lst[place][0] == "PTR":#to check
                         for k in range(4,len(Com.DIRECTIVE)):
@@ -158,19 +148,16 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                             Com.operands[i][j-2][0][2] = True
                             Com.operands[i][j-2][1][2] = Com.NUMBERS_FOR_REG[k]
                             break
-                    left = right = 0
-                    gaps = False
+                    left = 0
+                    right = 0
                     for k in range(len(syn), len(lst)):
                         if lst[k][0] == "[":
-                            gaps = True
-                            left = k
-                        if lst[k][0] == "]" and gaps:
-                            gaps = False
-                            right = k
-                            break
-                    if len(lst)-1 != right or gaps:
-                        gaps = False
-                        Com.error_flags.append([i,right]) #to do: wrong index for right bracket
+                            left +=1
+                        if lst[k][0] == "]" and left >= right:
+                            right+=1
+                    if left != right:
+                        Com.error_flags.append([i, right])
+                        print("brackets")
                         return
                     counter = 0
                     for k in range(left,right+1):
@@ -188,8 +175,13 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                 elif lst[place][1] == "NUMBER":
                     Com.operands[i][j-2][0][5] = True
                     Com.operands[i][j-2][1][5] = lst[place][0]
+                    if place == 1:
+                        print("Error")
+                        Com.error_flags.append([i,place])               #to do twice if there is no user id/label
+                        print("number")
+                        continue
                 
-    print(Com.operands[i])
-    print()
+   # print(Com.operands[i])
+   # print()
 
 

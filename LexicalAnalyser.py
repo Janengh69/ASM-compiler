@@ -2,7 +2,7 @@ import re
 import Common as Com
 import sys
 
-def AsmFileToList(filename):
+def AsmFileToList(filename): #strip 
     file = open(filename, "r")
     programm = list()
     for line in file:
@@ -38,11 +38,11 @@ def macro_search(lst):
     count = -1
     macro_flag = False
     for row in lst:
-        if any("MACRO" in s for s in row):# checing if there are any MACRO in list
+        if any("MACRO" in s for s in row): # checing if there are any MACRO in list
             Com.macro_buf.append([])
             count +=1
             macro_flag = True              # there is macro 
-            Com.macro_format.append(row[0])
+            Com.macro_user.append(row[0])
             if len(row) > 2:                    # in case MACRO has parametrs
                 Com.macro_param.append(row[2])
             #Com.macro_buf[count].append(row)
@@ -53,7 +53,7 @@ def macro_search(lst):
         if macro_flag:
             Com.macro_buf[count].append(row)  # end of macro 
     #print(Com.macro_buf)
-   # print(Com.macro_format)
+   # print(Com.macro_user)
    # print(Com.macro_param)
         
 def check_is_mnem(word):
@@ -120,116 +120,154 @@ def output(list1):
             print(" |", end = '')
         print()
 
+
+
+# if data1 segment, but data ends TO DO: mistakes on all lines
+# text between data and code segment
+
 def list_to_table(lst):
     result = list() 
     user_list = set()
     pos = 0
-    count_macro = 0
-    count = 0
+    count_macro = 0             # to skip macros in determining error position
+    count = 0                   # for controlling segments 
     user_macro = False
     flag = False
     param_flag = True
+    segment_flag = False
+    program_works = True
     for word in lst:
         if word:
             result.append([])
         else: 
             continue
         for i in range(len(word)):      #describing every word (lexical analysis)
-            row = list()
-            if check_is_mnem(word[i]):
-                row = [word[i].upper(), "MNEM", len(word[i])]
-                flag = True
-                param_flag = True
-            elif check_is_macro(word[i]):
-                row = [ word[i].upper(), "MACRO", len(word[i])]
-                flag = True
-            elif check_is_segment_id(word[i]):
-                row = [ word[i].upper(), "ID_SEGMENT", len(word[i])]
-                flag = True
-            elif check_is_directive(word[i]):
-                row = [ word[i].upper(), "DIRECTIVE", len(word[i])]
-                flag = True
-            elif check_is_segment(word[i]):
-                row = [ word[i].upper(), "SEGMENT", len(word[i])]
-                count+=1
+            if program_works:
+                row = list()
+                if check_is_mnem(word[i]):
+                    row = [word[i].upper(), "MNEM", len(word[i])]
+                    flag = True
+                    param_flag = True              
+                elif check_is_macro(word[i]):
+                    row = [ word[i].upper(), "MACRO", len(word[i])]
+                    flag = True
+                elif check_is_segment_id(word[i]):
+                    row = [ word[i].upper(), "ID_SEGMENT", len(word[i])]
+                    flag = True
+                elif check_is_directive(word[i]):
+                    row = [ word[i].upper(), "DIRECTIVE", len(word[i])]
+                    flag = True
+                elif check_is_segment(word[i]):
+                    row = [word[i].upper(), "SEGMENT", len(word[i])]
+                    count+=1
+                    if len(word) == 2 and word[i].upper() == "SEGMENT": #to doo
+                        segment_flag = True
+                        if word[i-1] == ''.join(re.findall(r'[A-Z|a-z?.\d+]', word[i-1])) and len(word[i-1]) <= 6:
+                            row = [word[i-1].upper(), "SEGMENT_USER", len(word[i-1])]
+                            Com.segment_user.append(word[i-1])                 # to differentiate name of segments later
+                            result[pos].append(row)
+                            row = [word[i].upper(), "SEGMENT", len(word[i])]
 
-                if len(word) == 1 and word[i].upper() != "END":             # in case user forgot to name segment
-                    Com.error_flags.append([pos - count_macro, i])
-                
-                if count == 2 and word[i].upper() == "END" or count == 2 and word[i].upper() != "ENDS": #in case user forgot to close segment
-                    Com.error_flags.append([pos-count_macro, i])
-                    #sys.exit(1)
-                if count == 2: 
-                    count = 0
-                flag = True
-            elif check_is_symbol(word[i]):
-                row = [ word[i], "SYMBOL", len(word[i])]
-                if len(word) == 1:
-                    Com.error_flags.append([pos-count_macro, i])
-                flag = True
-            elif check_is_register8(word[i]):
-                row = [ word[i].upper(), "REGISTER8", len(word[i])]
-                flag = True
-            elif check_is_register16(word[i]):
-                row = [ word[i].upper(), "REGISTER16", len(word[i])]
-                flag = True
-            elif word[i] == '':
-                continue
-            elif word[i] == ''.join(re.findall(r'0+[0-9a-fA-F]+[hH]', word[i])) or word[i] == ''.join(re.findall(r'[01]+[bB]', word[i])) or word[i] == ''.join(re.findall(r'[0-9]+[dD]?', word[i])):
-                row = [ word[i], "NUMBER", len(word[i])]
-                flag = True
-            elif word[i] == ''.join(re.findall(r'[@][a-z]+[0-9]+', word[i])) and not flag:
-                row = [ word[i], "LABLE", len(word[i])]
-            elif word[i] == ''.join(re.findall(r'[A-Z|a-z?.\d+]', word[i])) and len(word[i]) <= 6 and not flag:
-                for k in range(len(Com.macro_format)):
-                    if Com.macro_format[k] == word[i]:
-                        if len(word) == 1 or (len(word) == 2 and word[1] != "MACRO"):   #in case we call macro in program 
-                            if len(word) == 2:
-                                param = word[1]      
-                            param_flag = False
-                            for x in Com.macro_buf[k]:
-                                    row = macro_to_lex(x)               #lexical analysis for macro 
-                                    if row != None:
-                                        for rw in row:                  #replacing formal parametr into actual one
-                                            if rw[1] == "USER_MACRO_PARAM":
-                                                rw[0] = param.upper()
-                                        result.append(row)
-                                        pos+=1
-                                        count_macro +=1
-                            break
-                        row = [word[i].upper(), "USER_MACRO", len(word[i])]
-                        user_marco = True
-                        break
-                if not user_macro:
-                    if Com.macro_param:
-                        for param in Com.macro_param:
-                            if word[i].upper() == param:
-                                row = [ word[i].upper(), "USER_MACRO_PARAM", len(word[i])]
+                    if len(word) == 1 and word[i].upper() != "END":        # in case user forgot to name segment
+                        Com.error_flags.append([pos - count_macro+1, i])
+                        segment_flag = False   
+                        print("end")
+
+                    elif count == 2 and word[i].upper() == "END" or count == 2 and word[i].upper() != "ENDS": #in case user forgot to close segment
+                        Com.error_flags.append([pos-count_macro+1, i])
+                        segment_flag = False
+                        print("ends")
+
+                    elif count == 2 and word[i].upper() == "ENDS":        #if segment ends
+                        for usr in Com.segment_user:
+                            if usr == word[i-1]:
+                                segment_flag = False
+                                row = [word[i].upper(), "SEGMENT", len(word[i])]
+                                result[pos].append(row)
+                        if segment_flag:
+                            Com.error_flags.append([pos-count_macro+1, i])
+                            print("data1 != data")
+                            continue
+                    if len(word) == 1 and word[i].upper() == "END": #all segments are closed but we should append end
+                        segment_flag = True   
+                        program_works = False    
+                    if count == 2: 
+                        count = 0
+                    flag = True
+
+                elif check_is_symbol(word[i]):
+                    row = [ word[i], "SYMBOL", len(word[i])]
+                    if len(word) == 1:
+                        Com.error_flags.append([pos-count_macro+1, i])
+                    if word[i] == ',' and word[i-1] == ',':
+                        Com.error_flags.append([pos-count_macro+1, i])
+                    if i == len(word)-1 and word[i] != ']' and  word[i] != ':':
+                        Com.error_flags.append([pos-count_macro+1, i])
+                    flag = True
+                elif check_is_register8(word[i]):
+                    row = [ word[i].upper(), "REGISTER8", len(word[i])]
+                    flag = True
+                elif check_is_register16(word[i]):
+                    row = [ word[i].upper(), "REGISTER16", len(word[i])]
+                    flag = True
+                elif word[i] == '':
+                    continue
+                elif word[i] == ''.join(re.findall(r'0+[0-9a-fA-F]+[hH]', word[i])) or word[i] == ''.join(re.findall(r'[01]+[bB]', word[i])) or word[i] == ''.join(re.findall(r'[0-9]+[dD]?', word[i])):
+                    row = [ word[i], "NUMBER", len(word[i])]
+                    flag = True
+                elif word[i] == ''.join(re.findall(r'[@][a-z]+[0-9]+', word[i])) and not flag:
+                    row = [ word[i], "LABLE", len(word[i])]
+                elif word[i] == ''.join(re.findall(r'[A-Z|a-z?.\d+]', word[i])) and len(word[i]) <= 6 and not flag:
+                    for k in range(len(Com.macro_user)):
+                        if Com.macro_user[k] == word[i]:
+                            if len(word) == 1 or (len(word) == 2 and word[1] != "MACRO"):   #in case we call macro in program 
+                                if len(word) == 2:
+                                    param = word[1]      
+                                param_flag = False
+                                for x in Com.macro_buf[k]:
+                                        row = macro_to_lex(x)               #lexical analysis for macro 
+                                        if row != None:
+                                            for rw in row:                  #replacing formal parametr into actual one
+                                                if rw[1] == "USER_MACRO_PARAM":
+                                                    rw[0] = param.upper()
+                                            result.append(row)
+                                            pos+=1
+                                            count_macro +=1
                                 break
-                            else:
-                                row = [word[i].upper(), "USER", len(word[i])]
-                                user_list.add(word[i])      #set not to allow names repeating
-                                user_macro = False
-                    else:
-                        row = [word[i].upper(), "USER", len(word[i])]
-                        user_list.add(word[i])      #set not to allow names repeating
-                        user_macro = False
-            elif word[i][0] == '"' and word[i][len(word[i])-1] == '"' and not flag: 
-                 word[i] = ''.join(re.findall(r'[\"A-Z|a-z|\d+\"]', word[i]))
-                 row = [ word[i], "TEXTCONST", len(word[i])]
-            elif word[i] == ''.join(re.findall(r'[A-Z|a-z|\d+]', word[i])) and not flag:
-                if len(word[i]) > 6:
-                    row = [ word[i].upper, "UNDERFINED", len(word[i])]
-            if param_flag and row != None:
-                result[pos].append(row)
-            flag = False
-            user_macro = False
+                            row = [word[i].upper(), "USER_MACRO", len(word[i])]
+                            user_marco = True
+                            break
+                    if not user_macro:
+                        if Com.macro_param:
+                            for param in Com.macro_param:
+                                if word[i].upper() == param:
+                                    row = [ word[i].upper(), "USER_MACRO_PARAM", len(word[i])]
+                                    break
+                                else:
+                                    row = [word[i].upper(), "USER", len(word[i])]
+                                    user_list.add(word[i])      #set not to allow names repeating
+                                    user_macro = False
+                        else:
+                            row = [word[i].upper(), "USER", len(word[i])]
+                            user_list.add(word[i])      #set not to allow names repeating
+                            user_macro = False
+                elif word[i][0] == '"' and word[i][len(word[i])-1] == '"' and not flag: 
+                    word[i] = ''.join(re.findall(r'[\"A-Z|a-z|\d+\"]', word[i]))
+                    row = [ word[i], "TEXTCONST", len(word[i])]
+                elif word[i] == ''.join(re.findall(r'[A-Z|a-z|\d+]', word[i])) and not flag:
+                    if len(word[i]) > 6:
+                        row = [ word[i].upper, "UNDERFINED", len(word[i])]
+                if param_flag and row != None and segment_flag:
+                    result[pos].append(row)
+                flag = False
+                user_macro = False
+            else:
+                Com.error_flags.append([pos - count_macro +1, i])
+                print("end of programm")
         pos +=1
-   # print(result)
     result = [x for x in result if x != []] #clearing empty lists 
     Com.user_list = list(user_list)
     return(result)
-
 
 
 def macro_to_lex(lst):
@@ -271,8 +309,8 @@ def macro_to_lex(lst):
             elif word == ''.join(re.findall(r'[@][a-z]+[0-9]+', word)) and not flag:
                 row = [ word, "LABLE", len(word)]
             elif word == ''.join(re.findall(r'[A-Z|a-z?.\d+]', word)) and len(word) <= 6 and not flag:
-                for k in range(len(Com.macro_format)):
-                    if Com.macro_format[k] == word:
+                for k in range(len(Com.macro_user)):
+                    if Com.macro_user[k] == word:
                         row = [word.upper(), "USER_MACRO", len(word)] 
                         user_marco = True
                         continue
@@ -295,5 +333,4 @@ def macro_to_lex(lst):
             flag = False
         else: 
             continue
-   # print(result)
     return(result)
