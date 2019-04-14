@@ -17,3 +17,8 @@ macro_param = list()        # paraments when calling macro
 operands = list()           # table with information about operands
 user_list = list()          # list for user identifiers in program
 segment_user = list()       # list of user segment identifiers 
+table_segment = list()
+
+active_seg = 0            # for counting segments and check if it opened
+segment_flag = False
+shift = 0 

@@ -1,5 +1,5 @@
 DATA SEGMENT
-	VB		DB	111111b
+	VB		DB	111111b				
 	VD		DD	0d34dah
 	VW		DW	5d
 	Strin	DB	"DoroshKaruna"
@@ -22,7 +22,7 @@ EXMPL2 MACRO NUM
 ENDM	
 EXMPL2 ax
 	mov ax, 0
-	mov cx, 8
+	mov cx, 0
 label2:
 	inc al
 	cmp ax, VW
@@ -30,26 +30,3 @@ label2:
 	jge label2
 CODE ENDS
 END
-
-; SEGMENT
-;   ENDS
-;   30
-;   edi
-;   vd10[edi]
-;   vd2
-;   dec vd
-;   ,
-;   :fdf:
-;   mov edi,, 0
-;   mov edi, 0 ,
-;   mov edi[edi], 0
-;   scasb mov
-;   mov
-;   dec cs vd[edi]
-;   dec :vd[edi]
-;   dec ,vd[edi]
-;   jnb label2:
-;   jnb edi
-;   mov 2, edi
-;   mov edi, 0, 0
-;   mov edi, 0 0

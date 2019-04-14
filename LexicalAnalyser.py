@@ -134,7 +134,6 @@ def list_to_table(lst):
     user_macro = False
     flag = False
     param_flag = True
-    segment_flag = False
     program_works = True
     for word in lst:
         if word:
@@ -148,54 +147,53 @@ def list_to_table(lst):
                     row = [word[i].upper(), "MNEM", len(word[i])]
                     flag = True
                     param_flag = True              
-                elif check_is_macro(word[i]):
+                elif check_is_macro(word[i]) and Com.segment_flag:
                     row = [ word[i].upper(), "MACRO", len(word[i])]
                     flag = True
-                elif check_is_segment_id(word[i]):
+                elif check_is_segment_id(word[i])and Com.segment_flag:
                     row = [ word[i].upper(), "ID_SEGMENT", len(word[i])]
                     flag = True
-                elif check_is_directive(word[i]):
+                elif check_is_directive(word[i])and Com.segment_flag:
                     row = [ word[i].upper(), "DIRECTIVE", len(word[i])]
                     flag = True
                 elif check_is_segment(word[i]):
                     row = [word[i].upper(), "SEGMENT", len(word[i])]
-                    count+=1
+                    Com.active_seg+=1
                     if len(word) == 2 and word[i].upper() == "SEGMENT": #to doo
-                        segment_flag = True
+                        Com.segment_flag = True
                         if word[i-1] == ''.join(re.findall(r'[A-Z|a-z?.\d+]', word[i-1])) and len(word[i-1]) <= 6:
                             row = [word[i-1].upper(), "SEGMENT_USER", len(word[i-1])]
                             Com.segment_user.append(word[i-1])                 # to differentiate name of segments later
+                            Com.error_flags = Com.error_flags[:-1]
                             result[pos].append(row)
                             row = [word[i].upper(), "SEGMENT", len(word[i])]
-
                     if len(word) == 1 and word[i].upper() != "END":        # in case user forgot to name segment
                         Com.error_flags.append([pos - count_macro+1, i])
-                        segment_flag = False   
+                        Com.segment_flag = False   
                         print("end")
 
-                    elif count == 2 and word[i].upper() == "END" or count == 2 and word[i].upper() != "ENDS": #in case user forgot to close segment
+                    elif Com.active_seg%2 == 0 and word[i].upper() == "END" or Com.active_seg%2 == 0 and word[i].upper() != "ENDS": #in case user forgot to close segment
                         Com.error_flags.append([pos-count_macro+1, i])
-                        segment_flag = False
+                        Com.segment_flag = False
+                        Com.active_seg +=1
                         print("ends")
 
-                    elif count == 2 and word[i].upper() == "ENDS":        #if segment ends
+                    elif Com.active_seg%2 == 0 and word[i].upper() == "ENDS":        #if segment ends
                         for usr in Com.segment_user:
                             if usr == word[i-1]:
-                                segment_flag = False
+                                Com.segment_flag = False
                                 row = [word[i].upper(), "SEGMENT", len(word[i])]
                                 result[pos].append(row)
-                        if segment_flag:
+                        if Com.segment_flag:
                             Com.error_flags.append([pos-count_macro+1, i])
                             print("data1 != data")
                             continue
                     if len(word) == 1 and word[i].upper() == "END": #all segments are closed but we should append end
-                        segment_flag = True   
+                        Com.segment_flag = True   
                         program_works = False    
-                    if count == 2: 
-                        count = 0
                     flag = True
 
-                elif check_is_symbol(word[i]):
+                elif check_is_symbol(word[i])and Com.segment_flag:
                     row = [ word[i], "SYMBOL", len(word[i])]
                     if len(word) == 1:
                         Com.error_flags.append([pos-count_macro+1, i])
@@ -204,20 +202,20 @@ def list_to_table(lst):
                     if i == len(word)-1 and word[i] != ']' and  word[i] != ':':
                         Com.error_flags.append([pos-count_macro+1, i])
                     flag = True
-                elif check_is_register8(word[i]):
+                elif check_is_register8(word[i])and Com.segment_flag:
                     row = [ word[i].upper(), "REGISTER8", len(word[i])]
                     flag = True
-                elif check_is_register16(word[i]):
+                elif check_is_register16(word[i])and Com.segment_flag:
                     row = [ word[i].upper(), "REGISTER16", len(word[i])]
                     flag = True
                 elif word[i] == '':
                     continue
-                elif word[i] == ''.join(re.findall(r'0+[0-9a-fA-F]+[hH]', word[i])) or word[i] == ''.join(re.findall(r'[01]+[bB]', word[i])) or word[i] == ''.join(re.findall(r'[0-9]+[dD]?', word[i])):
+                elif word[i] == ''.join(re.findall(r'0+[0-9a-fA-F]+[hH]', word[i])) or word[i] == ''.join(re.findall(r'[01]+[bB]', word[i])) or word[i] == ''.join(re.findall(r'[0-9]+[dD]?', word[i])) and Com.segment_flag:
                     row = [ word[i], "NUMBER", len(word[i])]
                     flag = True
-                elif word[i] == ''.join(re.findall(r'[@][a-z]+[0-9]+', word[i])) and not flag:
+                elif word[i] == ''.join(re.findall(r'[@][a-z]+[0-9]+', word[i])) and Com.segment_flag and not flag:
                     row = [ word[i], "LABLE", len(word[i])]
-                elif word[i] == ''.join(re.findall(r'[A-Z|a-z?.\d+]', word[i])) and len(word[i]) <= 6 and not flag:
+                elif word[i] == ''.join(re.findall(r'[A-Z|a-z?.\d+]', word[i])) and Com.segment_flag and len(word[i]) <= 6 and not flag:
                     for k in range(len(Com.macro_user)):
                         if Com.macro_user[k] == word[i]:
                             if len(word) == 1 or (len(word) == 2 and word[1] != "MACRO"):   #in case we call macro in program 
@@ -251,16 +249,21 @@ def list_to_table(lst):
                             row = [word[i].upper(), "USER", len(word[i])]
                             user_list.add(word[i])      #set not to allow names repeating
                             user_macro = False
-                elif word[i][0] == '"' and word[i][len(word[i])-1] == '"' and not flag: 
+                elif word[i][0] == '"' and word[i][len(word[i])-1] == '"' and not flag and Com.segment_flag: 
                     word[i] = ''.join(re.findall(r'[\"A-Z|a-z|\d+\"]', word[i]))
                     row = [ word[i], "TEXTCONST", len(word[i])]
-                elif word[i] == ''.join(re.findall(r'[A-Z|a-z|\d+]', word[i])) and not flag:
+                elif word[i] == ''.join(re.findall(r'[A-Z|a-z|\d+]', word[i])) and not flag and Com.segment_flag:
+
                     if len(word[i]) > 6:
                         row = [ word[i].upper, "UNDERFINED", len(word[i])]
-                if param_flag and row != None and segment_flag:
+                elif not Com.segment_flag: # and Com.active_seg != 0:
+                        Com.error_flags.append([pos - count_macro +1, i])
+                if param_flag and row != None and Com.segment_flag:
                     result[pos].append(row)
                 flag = False
                 user_macro = False
+                
+
             else:
                 Com.error_flags.append([pos - count_macro +1, i])
                 print("end of programm")
