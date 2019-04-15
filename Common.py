@@ -1,6 +1,7 @@
 
 SYMBOLS = [ '[', ']', '.', ',', '_','+', '-', ':']
 MNEM = [ "MOV", "ADD", "DEC", "CMP", "AND", "OR", "INC", "JGE", "MOVSW"]
+#OPER = ["reg-imm", "reg-reg", "mem", "reg-mem", "mem-reg", "mem-imm", "reg", " ", " " ]
 DIRECTIVE =  [ "DB", "DW", "DD", "PTR", "WORD", "DWORD", "BYTE"]
 REGISTER16 = [ 'AX', 'CX', 'DX', 'BX', 'SP', 'BP', 'SI', 'DI']
 REGISTER8 = [ 'AL','CL', 'DL', 'BL','AH',  'CH', 'DH', 'BH']

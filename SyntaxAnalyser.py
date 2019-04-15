@@ -1,4 +1,5 @@
 import Common as Com
+#asl about macro parametr
 def syntax_check(lex_list):
     table = list()
     pos = 0
@@ -98,7 +99,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
     Com.operands[i][1].append(['', '', '', '', '',''])
     Com.operands[i][1].append(['', '', '', '', '',''])
     error_flag = True
-    if len(syn) > 2: 
+    if len(syn) >= 2: 
         if lst[0][1] == "MNEM":
             count = 0                       #to control shift in operands table
             for j in range(1, len(syn)):
@@ -139,7 +140,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         if Com.user_list[k].upper() == lst[place][0]:
                             Com.operands[i][j-count][0][3] = True
                             Com.operands[i][j-count][1][3] = k
-                elif syn[j][1] > 1:  
+                elif syn[j][1] > 1: 
                     #if it contains ptr (2 column) 
                     if lst[place][0] == "PTR":#to check
                         for k in range(4,len(Com.DIRECTIVE)):
@@ -165,8 +166,9 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         return
                     counter = 0
                     for k in range(len(syn), syn[2][1]):
-                        if lst[k][1] == "REGISTER16": 
-                            count -= 1  #cause count increments two times because of ig_segment and ptr
+                        if lst[k][1] == "REGISTER16":
+                           # count -= 1
+                             #cause count increments two times because of ig_segment and ptr
                             Com.operands[i][j-count][0][4] = True
                             Com.operands[i][j-count][1][4] = Com.NUMBERS_FOR_REG[counter]
                         elif lst[k][1] == "REGISTER8":
