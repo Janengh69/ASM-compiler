@@ -220,7 +220,8 @@ def list_to_table(lst):
                         if Com.macro_user[k] == word[i]:
                             if len(word) == 1 or (len(word) == 2 and word[1] != "MACRO"):   #in case we call macro in program 
                                 if len(word) == 2:
-                                    param = word[1]      
+                                    param = word[1]
+                                    Com.macro_fact_param.append(param)      #for grammar analysis
                                 param_flag = False
                                 for x in Com.macro_buf[k]:
                                         row = macro_to_lex(x)               #lexical analysis for macro 

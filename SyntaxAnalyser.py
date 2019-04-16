@@ -1,5 +1,5 @@
 import Common as Com
-#asl about macro parametr
+#ask about macro parametr
 def syntax_check(lex_list):
     table = list()
     pos = 0
@@ -111,7 +111,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                 #if it contains register (1 row)
                 count += 1
 
-                if lst[place][1] == "REGISTER16":
+                if lst[place][1] == "REGISTER16" and lst[place-1][0] != "[":
                      Com.operands[i][j-count][0][0] = True
                      Com.operands[i][j-count][1][0] = 16
                      for com in range(len(Com.REGISTER16)):
@@ -135,11 +135,17 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                          print("not register")
                          return
                 #if it contains label or user id (4 column)
-                elif lst[place][1] == "USER":
+                elif lst[place][1] == "USER" or lst[place][1] == "USER_MACRO_PARAM":
                     for k in range(len(Com.user_list)):
                         if Com.user_list[k].upper() == lst[place][0]:
                             Com.operands[i][j-count][0][3] = True
                             Com.operands[i][j-count][1][3] = k
+                            break
+                    for k in range(len(Com.macro_fact_param)):
+                        if Com.macro_fact_param[k].upper() == lst[place][0]:
+                            Com.operands[i][j-count][0][0] = True
+                            Com.operands[i][j-count][1][0] = k
+                            break   
                 elif syn[j][1] > 1: 
                     #if it contains ptr (2 column) 
                     if lst[place][0] == "PTR":#to check
@@ -155,9 +161,12 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                             break
                     left = 0
                     right = 0
-                    for k in range(len(syn), len(lst)):
+                    for k in range(len(syn)-1, len(lst)):
                         if lst[k][0] == "[":
                             left +=1
+                        if lst[k][1] == "REGISTER16" and left>0: #TOOOOOOOOOOOOOOOOOOOOOOOOOO DOOOOOOOOOOOOOOOOOOOOOOOOOOOO CMP BL, [SI+1]
+                            Com.operands[i][j-count][0][4] = True
+                            Com.operands[i][j-count][1][4] = Com.REGISTER16.index(lst[k][0])
                         if lst[k][0] == "]" and left >= right:
                             right+=1
                     if left != right:

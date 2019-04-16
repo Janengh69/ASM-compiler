@@ -15,10 +15,15 @@ error_flags = list()        # for indexes of rows in program with error
 macro_buf = list()          # text in macro 
 macro_user = list()         # list of user identifiers using macro
 macro_param = list()        # paraments when calling macro
+macro_fact_param = list()
+start_macro = False
 operands = list()           # table with information about operands
 user_list = list()          # list for user identifiers in program
 segment_user = list()       # list of user segment identifiers 
 table_segment = list()
+lable_id = list()
+label_berofe_assigm = False
+
 
 active_seg = 0            # for counting segments and check if it opened
 segment_flag = False
