@@ -106,15 +106,16 @@ def segm_table(word, sh):#to do
                     else:
                         Com.shift += 2    
                 if word[i][0].upper() == "AND": #mem - reg
+                    print(Com.operands[sh][1][0][0])
                     if Com.operands[sh][1][0][0] and Com.operands[sh][0][0][3] or Com.operands[sh][1][0][0] and Com.operands[sh][0][0][2] or Com.operands[sh][1][0][0] and Com.operands[sh][0][0][1]: 
                         Com.shift += 1
                         if Com.operands[sh][0][0][3]: # user id
                             Com.shift += 3
                         if  Com.operands[sh][0][0][2]:# id segment 
                             Com.shift += 1
-                        if Com.operands[sh][0][0][5]:
+                        if Com.operands[sh][0][0][5]:#number
                             Com.shift += 1
-                        if Com.operands[sh][0][0][4]:
+                        if Com.operands[sh][0][0][4]:#add reg
                             Com.shift += 1
                     else:
                         Com.error_flags.append([sh+1, i])
@@ -141,6 +142,16 @@ def segm_table(word, sh):#to do
                     if Com.operands[sh][0][0][5]:# in case number
                         Com.shift += 1
                 if word[i][0].upper() == "ADD" and Com.operands[sh][1][0][0] and Com.operands[sh][0][0][0]:
+                    if len(word) == 4:
+                        if word[i+1][1] == "USER_MACRO_PARAM" or word[i+2][1] == "USER_MACRO_PARAM":
+                            if (word[i+1][0].endswith("H") or word[i+1][0].endswith("L")) or (word[i+2][0].endswith("H") or word[i+2][0].endswith("L")):
+                              Com.shift += 2
+                            if word[i+1][0].endswith("X") or word[i+2][0].endswith("X"):
+                                Com.shift += 1
+                            else: 
+                                Com.error_flags.append([sh+1, i])
+                                print("inproper parametr")
+                                continue
                     Com.shift += 2
                 if word[i][0].upper() == "INC" and  Com.operands[sh][0][0][0]:
                     if Com.operands[sh][0][1][0] == 8:
@@ -152,10 +163,15 @@ def segm_table(word, sh):#to do
                             Com.shift += 2
                         if word[i+1][0].endswith("X"):
                             Com.shift += 1
+                        else: 
+                            Com.error_flags.append([sh+1, i])
+                            print("inproper parametr")
+                            continue
                 if word[i][0].upper() == "MOVSW":
                     Com.shift += 1
                     if len(word) != 1:
                         Com.error_flags.append([sh+1,i])
+                        print("movws doesnt accept parametrs")
     
 
 def listing(word, number):

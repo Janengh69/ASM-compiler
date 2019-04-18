@@ -9,17 +9,21 @@ CODE SEGMENT
 	mov bl, 11000b  
 	cmp bl, [si+1]
 	jge label2
-EXMPL MACRO 	
-	and VB, bl		
-	or	VB, 110	
-ENDM  
+EXMPL MACRO
+	cmp ax, VW
+ENDM
 EXMPL
 	mov ax, 0d5h
 	dec word ptr GS:[si+1]	 		
-	add bx, ax			
+	add bx, ax	
 EXMPL2 MACRO NUM
 	inc NUM
-ENDM	
+	add bx, NUM	
+ENDM
+EXMPL5 MACRO NUM
+	inc NUM
+ENDM
+EXMPL5 bx
 EXMPL2 ax
 	mov ax, 0
 	mov cx, 0

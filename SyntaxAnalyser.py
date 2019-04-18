@@ -142,7 +142,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                             Com.operands[i][j-count][1][3] = k
                             break
                     for k in range(len(Com.macro_fact_param)):
-                        if Com.macro_fact_param[k].upper() == lst[place][0]:
+                        if Com.macro_fact_param[k][1].upper() == lst[place][0]:
                             Com.operands[i][j-count][0][0] = True
                             Com.operands[i][j-count][1][0] = k
                             break   
@@ -176,7 +176,8 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                     counter = 0
                     for k in range(len(syn), syn[2][1]):
                         if lst[k][1] == "REGISTER16":
-                           # count -= 1
+                            if syn[2][1] >= 5:
+                                count -= 1
                              #cause count increments two times because of ig_segment and ptr
                             Com.operands[i][j-count][0][4] = True
                             Com.operands[i][j-count][1][4] = Com.NUMBERS_FOR_REG[counter]
@@ -197,7 +198,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         print("number")
                         continue
                 
-    #print(Com.operands[i])
+#    print(Com.operands[i])
 
 
 def print_operands():

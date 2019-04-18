@@ -37,21 +37,32 @@ def AsmFileToList(filename): #strip
 def macro_search(lst):
     count = -1
     macro_flag = False
-    for row in lst:
-        if any("MACRO" in s for s in row): # checing if there are any MACRO in list
-            Com.macro_buf.append([])
-            count +=1
-            macro_flag = True              # there is macro 
-            Com.macro_user.append(row[0])
-            if len(row) > 2:                    # in case MACRO has parametrs
-                Com.macro_param.append(row[2])
-            #Com.macro_buf[count].append(row)
-            continue
+    for row in range(len(lst)):
+        if any("MACRO" in s for s in lst[row]) : # checing if there are any MACRO in list
+                # in case this is not "macro parametr"
+            if len(lst[row]) == 2 and lst[row][0] != "MACRO" or len(lst[row]) == 3:
+                Com.macro_buf.append([])
+                count +=1
+                macro_flag = True              # there is macro 
+                Com.macro_user.append(lst[row][0])
+                if len(lst[row]) > 2:                    # in case MACRO has parametrs
+                    Com.macro_param.append(lst[row][2])
+                #Com.macro_buf[count].append(row)
+                continue
+            elif len(lst[row]) == 2 and lst[row][0].upper() == "MACRO":
+                Com.error_flags.append([row+1, 0])
+                print("macro1")
+                continue
+            else:
+                 Com.error_flags.append([row+1, 0])
+                 print("macro")
+                 continue
+
         if macro_flag:      #recording all the MACRO in macro_buf list
-            if any("ENDM" in s for s in row):
+            if any("ENDM" in s for s in lst[row]):
                 macro_flag = False 
         if macro_flag:
-            Com.macro_buf[count].append(row)  # end of macro 
+            Com.macro_buf[count].append(lst[row])  # end of macro 
     #print(Com.macro_buf)
    # print(Com.macro_user)
    # print(Com.macro_param)
@@ -221,7 +232,8 @@ def list_to_table(lst):
                             if len(word) == 1 or (len(word) == 2 and word[1] != "MACRO"):   #in case we call macro in program 
                                 if len(word) == 2:
                                     param = word[1]
-                                    Com.macro_fact_param.append(param)      #for grammar analysis
+                                    Com.macro_fact_param.append([word[0], param])      #for grammar analysis
+                                  #  print(Com.macro_fact_param)
                                 param_flag = False
                                 for x in Com.macro_buf[k]:
                                         row = macro_to_lex(x)               #lexical analysis for macro 
