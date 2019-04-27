@@ -231,6 +231,15 @@ def list_to_table(lst):
                         if Com.macro_user[k] == word[i]:
                             if len(word) == 1 or (len(word) == 2 and word[1] != "MACRO"):   #in case we call macro in program 
                                 if len(word) == 2:
+                                        row = macro_to_lex(word)
+                                        result.append(row)
+                                        pos+=1
+                                else:
+                                    row.append([word[0].upper(), "USER_MACRO", len(word[0])])
+                                    result.append(row)
+                                    pos+=1
+                                ###########################################################
+                                if len(word) == 2:
                                     param = word[1]
                                     Com.macro_fact_param.append([word[0], param])      #for grammar analysis
                                   #  print(Com.macro_fact_param)
@@ -262,9 +271,20 @@ def list_to_table(lst):
                             row = [word[i].upper(), "USER", len(word[i])]
                             user_list.add(word[i])      #set not to allow names repeating
                             user_macro = False
-                elif word[i][0] == '"' and word[i][len(word[i])-1] == '"' and not flag and Com.segment_flag: 
-                    word[i] = ''.join(re.findall(r'[\"A-Z|a-z|\d+\"]', word[i]))
-                    row = [ word[i], "TEXTCONST", len(word[i])]
+                elif word[i][0] == '"'  and not flag and Com.segment_flag : 
+                    if word[i][len(word[i])-1] == '"':
+                        word[i] = ''.join(re.findall(r'[\"A-Z|a-z|\d+\"]', word[i]))
+                        row = [ word[i], "TEXTCONST", len(word[i])]
+                    else: 
+                        Com.error_flags.append([pos - count_macro +1, i])
+                        continue                                                                                    ##HZ NADO LI SKIPAT
+                elif word[i][len(word[i])-1] == '"'  and not flag and Com.segment_flag : 
+                    if word[i][0] == '"':
+                        word[i] = ''.join(re.findall(r'[\"A-Z|a-z|\d+\"]', word[i]))
+                        row = [ word[i], "TEXTCONST", len(word[i])]
+                    else: 
+                        Com.error_flags.append([pos - count_macro +1, i])
+                        continue                                            
                 elif word[i] == ''.join(re.findall(r'[A-Z|a-z|\d+]', word[i])) and not flag and Com.segment_flag:
 
                     if len(word[i]) > 6:

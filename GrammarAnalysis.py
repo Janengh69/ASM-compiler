@@ -3,6 +3,8 @@ import Common as Com
 #to do
 # 	VW		D	5d
 def segm_table(word, sh):#to do
+    if len(word) == 1 and word[0][0] in Com.macro_user or len(word) == 2 and word[0][0] in Com.macro_user and word[1][0] != "MACRO":
+        print("1    ", word[0][0])
     #in the beginnig of macro index
     if len(word) == 1 and word[0][0] == "END":
         Com.start_macro = True
