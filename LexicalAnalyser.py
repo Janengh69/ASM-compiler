@@ -50,11 +50,11 @@ def macro_search(lst):
                 #Com.macro_buf[count].append(row)
                 continue
             elif len(lst[row]) == 2 and lst[row][0].upper() == "MACRO":
-                Com.error_flags.append([row+1, 0])
+                Com.error_flags.append(row+1)
                 print("macro1")
                 continue
             else:
-                 Com.error_flags.append([row+1, 0])
+                 Com.error_flags.append(row+1)
                  print("macro")
                  continue
 
@@ -179,12 +179,12 @@ def list_to_table(lst):
                             result[pos].append(row)
                             row = [word[i].upper(), "SEGMENT", len(word[i])]
                     if len(word) == 1 and word[i].upper() != "END":        # in case user forgot to name segment
-                        Com.error_flags.append([pos - count_macro+1, i])
+                        Com.error_flags.append(pos - count_macro+1)
                         Com.segment_flag = False   
                         print("end")
 
                     elif Com.active_seg%2 == 0 and word[i].upper() == "END" or Com.active_seg%2 == 0 and word[i].upper() != "ENDS": #in case user forgot to close segment
-                        Com.error_flags.append([pos-count_macro+1, i])
+                        Com.error_flags.append(pos-count_macro+1)
                         Com.segment_flag = False
                         Com.active_seg +=1
                         print("ends")
@@ -196,7 +196,7 @@ def list_to_table(lst):
                                 row = [word[i].upper(), "SEGMENT", len(word[i])]
                                 result[pos].append(row)
                         if Com.segment_flag:
-                            Com.error_flags.append([pos-count_macro+1, i])
+                            Com.error_flags.append(pos-count_macro+1)
                             print("data1 != data")
                             continue
                     if len(word) == 1 and word[i].upper() == "END": #all segments are closed but we should append end
@@ -207,11 +207,11 @@ def list_to_table(lst):
                 elif check_is_symbol(word[i])and Com.segment_flag:
                     row = [ word[i], "SYMBOL", len(word[i])]
                     if len(word) == 1:
-                        Com.error_flags.append([pos-count_macro+1, i])
+                        Com.error_flags.append(pos-count_macro+1)
                     if word[i] == ',' and word[i-1] == ',':
-                        Com.error_flags.append([pos-count_macro+1, i])
+                        Com.error_flags.append(pos-count_macro+1)
                     if i == len(word)-1 and word[i] != ']' and  word[i] != ':':
-                        Com.error_flags.append([pos-count_macro+1, i])
+                        Com.error_flags.append(pos-count_macro+1)
                     flag = True
                 elif check_is_register8(word[i])and Com.segment_flag:
                     row = [ word[i].upper(), "REGISTER8", len(word[i])]
@@ -276,21 +276,21 @@ def list_to_table(lst):
                         word[i] = ''.join(re.findall(r'[\"A-Z|a-z|\d+\"]', word[i]))
                         row = [ word[i], "TEXTCONST", len(word[i])]
                     else: 
-                        Com.error_flags.append([pos - count_macro +1, i])
+                        Com.error_flags.append(pos - count_macro +1)
                         continue                                                                                    ##HZ NADO LI SKIPAT
                 elif word[i][len(word[i])-1] == '"'  and not flag and Com.segment_flag : 
                     if word[i][0] == '"':
                         word[i] = ''.join(re.findall(r'[\"A-Z|a-z|\d+\"]', word[i]))
                         row = [ word[i], "TEXTCONST", len(word[i])]
                     else: 
-                        Com.error_flags.append([pos - count_macro +1, i])
+                        Com.error_flags.append(pos - count_macro +1)
                         continue                                            
                 elif word[i] == ''.join(re.findall(r'[A-Z|a-z|\d+]', word[i])) and not flag and Com.segment_flag:
 
                     if len(word[i]) > 6:
                         row = [ word[i].upper, "UNDERFINED", len(word[i])]
                 elif not Com.segment_flag: # and Com.active_seg != 0:
-                        Com.error_flags.append([pos - count_macro +1, i])
+                        Com.error_flags.append(pos - count_macro +1)
                 if param_flag and row != None and Com.segment_flag:
                     result[pos].append(row)
                 flag = False
@@ -298,7 +298,7 @@ def list_to_table(lst):
                 
 
             else:
-                Com.error_flags.append([pos - count_macro +1, i])
+                Com.error_flags.append(pos - count_macro +1)
                 print("end of programm")
         pos +=1
     result = [x for x in result if x != []] #clearing empty lists 

@@ -14,7 +14,7 @@ def syntax_check(lex_list):
             if not i[j]:
                 continue
             if(i[j] and'UNDEFINED' in i[j][1] ):
-                Com.error_flags.append([pos+1, (i[j][1].index('UNDEFINED'))+1])         #in case we meet underfined world
+                Com.error_flags.append(pos+1)         #in case we meet underfined world
                 print("underfined")
                 pos += 1
                 continue
@@ -27,7 +27,7 @@ def syntax_check(lex_list):
                     count += 1
                     continue
                 elif(table[pos][0] == [] and table[pos][1] == []):
-                    Com.error_flags.append([pos+1, j+1])
+                    Com.error_flags.append(pos+1)
                     print("empty")
                     break
                 elif(len(table[pos]) == 2):
@@ -37,7 +37,7 @@ def syntax_check(lex_list):
                     fl = 3
                 table[pos][fl][1] += 1
             else:
-                Com.error_flags.append([pos+1, j+1])
+                Com.error_flags.append(pos+1)
               #  print("meh")
                 break
             count += 1
@@ -120,7 +120,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                              error_flag = False
                              break
                      if error_flag:                         #to check
-                         Com.error_flags.append([i][place])
+                         Com.error_flags.append(i)
                          return
                 elif lst[place][1] == "REGISTER8":
                      Com.operands[i][j-count][0][0] = True
@@ -131,7 +131,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                              error_flag = False
                              break
                      if error_flag:                 
-                         Com.error_flags.append([i][place])
+                         Com.error_flags.append(i)
                          print("not register")
                          return
                 #if it contains label or user id (4 column)
@@ -170,7 +170,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         if lst[k][0] == "]" and left >= right:
                             right+=1
                     if left != right:
-                        Com.error_flags.append([i, right])
+                        Com.error_flags.append(i)
                         print("brackets")
                         return
                     counter = 0
@@ -194,7 +194,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                     Com.operands[i][j-count][1][5] = lst[place][0]
                     if place == 1:
                         print("Error")
-                        Com.error_flags.append([i,place])               #to do twice if there is no user id/label
+                        Com.error_flags.append(i)               #to do twice if there is no user id/label
                         print("number")
                         continue
                 

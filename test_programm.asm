@@ -1,13 +1,13 @@
 DATA SEGMENT
 	VB		DB	111111b				
 	VD		DB	0d5h
-	VW		DW	5d
+	VW		DB	5d
 	Strin	DB	"DoroshKaruna"
 	stri	DB 	"A"
 DATA ENDS
 CODE SEGMENT
 	mov bl, 11000b  
-	cmp bl, [si+1]
+	cmp bl, word GS:[si+1]
 	jge label2
 EXMPL MACRO
 	cmp ax, VW
