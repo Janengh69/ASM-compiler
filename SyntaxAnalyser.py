@@ -143,9 +143,41 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                             break
                     for k in range(len(Com.macro_fact_param)):
                         if Com.macro_fact_param[k][1].upper() == lst[place][0]:
-                            Com.operands[i][j-count][0][0] = True
-                            Com.operands[i][j-count][1][0] = k
+                            Com.operands[i][j-count][0][3] = True
+                            Com.operands[i][j-count][1][3] = k
                             break   
+                           ########################################
+                    for k in range(len(Com.macro_param)):
+                        if Com.macro_param[k].upper() == lst[place][0]:
+                            Com.operands[i][j-count][0][3] = True
+                            Com.operands[i][j-count][1][3] = k
+                            break
+                         
+                    if lst[place][0] in Com.REGISTER16:
+                        Com.operands[i][j-count][0][0] = True
+                        Com.operands[i][j-count][1][0] = 16
+                        for com in range(len(Com.REGISTER16)):
+                            if lst[place][0] == Com.REGISTER16[com]:
+                                Com.operands[i][j-count][2][0] = com
+                                 ######################
+                                Com.operands[i][j-count][0][3] = False
+                                Com.operands[i][j-count][1][3] = ''
+                                ######################
+                                error_flag = False
+                                break
+                    if lst[place][0] in Com.REGISTER8:
+                        Com.operands[i][j-count][0][0] = True
+                        Com.operands[i][j-count][1][0] = 8
+                        for com in range(len(Com.REGISTER8)):
+                            if lst[place][0] == Com.REGISTER8[com]:
+                                Com.operands[i][j-count][2][0] = com
+                                ######################
+                                Com.operands[i][j-count][0][3] = False
+                                Com.operands[i][j-count][1][3] = ''
+                                #####################
+                                error_flag = False
+                                break    
+                                ######################################
                 elif syn[j][1] > 1: 
                     #if it contains ptr (2 column) 
                     if lst[place][0] == "PTR":#to check
