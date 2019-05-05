@@ -229,8 +229,6 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         Com.error_flags.append(i)               #to do twice if there is no user id/label
                         print("number")
                         continue
-                
-#    print(Com.operands[i])
 
 
 def print_operands():

@@ -12,9 +12,8 @@ def main():
     for i in range(len(Com.lex_table)):
         Syn.instruction_analysis(Com.lex_table[i], i, syntax_table[i])
         #print(Com.lex_table[i])
-        print(Com.operands[i])
+        #print(Com.operands[i])
         Gramm.segm_table(Com.lex_table[i], i)
-        Gramm.second_pass(Com.lex_table[i], i)
     #Syn.print_operands()
     print(list(set(Com.error_flags)))
 main()

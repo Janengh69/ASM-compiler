@@ -10,7 +10,7 @@ SEGMENT = [ "ENDS","SEGMENT",'END']
 MACRO = [ "MACRO", "ENDM" ]
 ID_SEGMENT = ["ES", "CS", "SS", "DS", "FS", "GS"]
 NUMBERS_FOR_REG = [ "26h", "2Eh", "6h", "3Eh", "64h", "65h" ]
-
+data_user = list()
 lex_table = list()          # for lexical analisys
 error_flags = list()        # for indexes of rows in program with error
 macro_buf = list()          # text in macro 

@@ -180,6 +180,7 @@ def segm_table(word, sh):
                     if len(word) != 1:
                         Com.error_flags.append(sh+1)
                         print("movws doesnt accept parametrs")
+    second_pass(word, sh)
     
 
 def listing(word, number):
@@ -190,3 +191,130 @@ def listing(word, number):
     for i in range(len(word)):
         print(word[i][0], end=' ')
     print()
+
+
+def second_pass(row, sh):
+    number = ""
+    byte_number = ""
+    if Com.active_seg == 1 and len(row) == 3:   # counting bytes in data segment 
+            Com.data_user.append(row[0][0])
+            byte_number = row[2][0]
+            if byte_number.endswith("b") :              #in case binary
+                byte_number = hex(int(byte_number[:-1],2))[2:].upper()
+            if byte_number.endswith("h"):                # in case hex
+                byte_number = hex(int(byte_number[:-1],16))[2:].upper() 
+            if byte_number.endswith("d"):                # in case demical 
+                byte_number = hex(int(byte_number[:-1], 10))[2:].upper() 
+            if byte_number.startswith("\"") and byte_number.endswith("\""):   #in case textconst
+                textconst = byte_number 
+                byte_number = " "
+                for i in range(1,len(textconst)-1):
+                    byte_number += hex(ord(textconst[i]))[-2:].upper() + " "
+    elif Com.active_seg == 2:
+        if Com.start_macro:
+            return
+        if row[0][0] == "MOV":
+            for i in range(len(Com.MNEM)):
+                if Com.MNEM[i] == "MOV":
+                    byte_number = int(Com.OPCODE[i], 16)                                #getting opcode 
+            if Com.operands[sh][0][0][0] and Com.operands[sh][1][0][5]:                 #if first is register and the second is the const
+                byte_number += Com.operands[sh][0][2][0]                                #including the register byte_number
+                temp = Com.operands[sh][1][1][5]                                        #in case 8register
+                if temp.endswith("h"):
+                    temp = temp[:-1]
+                if temp.endswith("b"):
+                    temp = hex(int(temp[:-1], 2))[-2:]
+                if temp.endswith("d"):
+                    temp = hex(int(temp[:-1], 10))[-2:]
+                if temp.startswith("0"):
+                    temp = temp[1:]
+                if Com.operands[sh][0][1][0] == 16:                                 #in case 16 register 
+                    byte_number += 8
+                    if len(temp) > 4:
+                        Com.error_flags.append(sh+1)                                #in case overflow
+                        print("oveflow")
+                        return
+                    else:
+                        byte_number = str(hex(byte_number)[-2:])
+                        number  = temp.rjust(4,'0')   
+                elif Com.operands[sh][0][1][0] == 8:      
+                    if len(temp) > 2:
+                        Com.error_flags.append(sh+1)                                #in case overflow
+                        print("oveflow")
+                        return
+                    else:
+                        byte_number = str(hex(byte_number)[-2:])
+                        number  = temp.rjust(2,'0')
+                else:
+                    Com.error_flags.append(sh+1)
+                    print("wrong")
+                    return
+        if row[0][0] == "ADD":
+            for i in range(len(Com.MNEM)):
+                if Com.MNEM[i] == "ADD":
+                    byte_number = int(Com.OPCODE[i], 16) 
+                                                                           #getting opcode
+            if Com.operands[sh][0][0][0] and Com.operands[sh][1][0][0] :
+                if Com.operands[sh][0][1][0] == Com.operands[sh][1][1][0]:
+                    if Com.operands[sh][0][1][0] == 16:
+                        byte_number += 1
+                else:
+                    Com.error_flags.append(sh+1)
+                byte_number = str(byte_number).rjust(2, '0')
+            else:
+                Com.error_flags.append(sh+1)
+                print("Ilegal operand")
+                return
+        if row[0][0] == "CMP":
+            mod = ""
+            reg = ""
+            rm = ""
+            for i in range(len(Com.MNEM)):
+                if Com.MNEM[i] == "CMP":
+                    byte_number = int(Com.OPCODE[i], 16) 
+            if Com.operands[sh][0][0][0] and Com.operands[sh][1][0][4] or Com.operands[sh][0][0][0] and Com.operands[sh][1][0][3] and row[3][0] in Com.data_user:  
+                if Com.operands[sh][0][1][0] == 16:
+                    byte_number += 1
+                if Com.operands[sh][1][0][3]:
+                    mod = "00"
+                    rm = "110"
+                    reg = str(Com.operands[sh][0][2][0]).rjust(3,'0')
+                    number = hex(int(mod + reg + rm, 2))[2:].rjust(2,'0')
+                if Com.operands[sh][1][0][4]:
+                    mod = "01"
+                    reg = str(Com.operands[sh][0][2][0]).rjust(3,'0')
+                    if Com.operands[sh][1][1][4] == 6: # in case si
+                        rm = "100"
+                    elif Com.operands[sh][1][1][4] == 7: #in case di
+                        rm = "101"
+                    elif Com.operands[sh][1][1][4] == 5: # in case bp
+                        rm = "110"
+                    elif Com.operands[sh][1][1][4] == 3: # in case bx
+                        rm = "111"
+                    else:                   #in case wrong adress register
+                        Com.error_flags.append(sh+1)
+                        print("inproper register")
+        if row[0][0] == "INC":
+            if Com.operands[sh][0][0][0]:
+                if Com.operands[sh][0][1][0] == 16:
+                    byte_number = int("40", 16)
+                    byte_number += Com.operands[sh][0][2][0]
+                if Com.operands[sh][0][1][0] == 8:
+                    for i in range(len(Com.MNEM)):
+                        if Com.MNEM[i] == "INC":
+                            byte_number = int(Com.OPCODE[i], 16)
+            else: 
+                Com.error_flags.append(sh+1)
+                return
+            byte_number = hex(byte_number)[-2:]
+        if row[0][0] == "MOVSW":
+            for i in range(len(Com.MNEM)):
+                if Com.MNEM[i] == "MOVSW":
+                    byte_number = Com.OPCODE[i]
+        if row[0][0] == "JGE":
+            for i in range(len(Com.MNEM)):
+                if Com.MNEM[i] == "JGE":
+                    byte_number = Com.OPCODE[i]
+        #if row[0][0] == "DEC":
+    print(str(byte_number) + " " + number)        
+    
