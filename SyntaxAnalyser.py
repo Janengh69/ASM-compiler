@@ -90,7 +90,6 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
     # 4 - user id, label
     # 5 - addr reg
     # 6 - const
-    #print(lst)
     Com.operands.append([[],[]])
     Com.operands[i][0].append([False, False, False, False, False, False])
     Com.operands[i][0].append(['', '', '', '', '',''])
@@ -101,15 +100,15 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
     error_flag = True
     if len(syn) >= 2: 
         if lst[0][1] == "MNEM":
-            count = 0                       #to control shift in operands table
+            count = 1                       #to control shift in operands table
             for j in range(1, len(syn)):
                 place = syn[j][0]
                 if place >= len(lst):
                     place-=1
-                if lst[place][1] == "SYMBOL":
-                    continue
+                if len(syn) == 3:
+                    count = j 
+               
                 #if it contains register (1 row)
-                count += 1
 
                 if lst[place][1] == "REGISTER16" and lst[place-1][0] != "[":
                      Com.operands[i][j-count][0][0] = True
@@ -119,6 +118,8 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                              Com.operands[i][j-count][2][0] = com
                              error_flag = False
                              break
+                     count += 1
+                             
                      if error_flag:                         #to check
                          Com.error_flags.append(i)
                          return
@@ -130,6 +131,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                              Com.operands[i][j-count][2][0] = com
                              error_flag = False
                              break
+                     count += 1
                      if error_flag:                 
                          Com.error_flags.append(i)
                          print("not register")
@@ -141,6 +143,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                             Com.operands[i][j-count][0][3] = True
                             Com.operands[i][j-count][1][3] = k
                             break
+
                     for k in range(len(Com.macro_fact_param)):
                         if Com.macro_fact_param[k][1].upper() == lst[place][0]:
                             Com.operands[i][j-count][0][3] = True
@@ -178,7 +181,9 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                                 error_flag = False
                                 break    
                                 ######################################
+                    count += 1
                 elif syn[j][1] > 1: 
+                    place = j
                     #if it contains ptr (2 column) 
                     if lst[place][0] == "PTR":#to check
                         for k in range(4,len(Com.DIRECTIVE)):
@@ -187,13 +192,13 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                                 Com.operands[i][j-count][1][1] = Com.DIRECTIVE[k]
                     #if it contains segment prefix (3 column)
                     for k in range(len(Com.ID_SEGMENT)):
-                        if Com.DIRECTIVE[k] == lst[place][0]:
+                        if Com.ID_SEGMENT[k] == lst[place][0]:
                             Com.operands[i][j-count][0][2] = True
                             Com.operands[i][j-count][1][2] = Com.NUMBERS_FOR_REG[k]
                             break
                     left = 0
                     right = 0
-                    for k in range(len(syn)-1, len(lst)):
+                    for k in range(len(lst)):
                         if lst[k][0] == "[":
                             left +=1
                         if lst[k][1] == "REGISTER16" and left>0: #TOOOOOOOOOOOOOOOOOOOOOOOOOO DOOOOOOOOOOOOOOOOOOOOOOOOOOOO CMP BL, [SI+1]
@@ -216,14 +221,17 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         elif lst[k][1] == "REGISTER8":
                             Com.operands[i][j-count][0][4] = True
                             Com.operands[i][j-count][1][4] = Com.NUMBERS_FOR_REG[counter]
-                        elif lst[k][1] == "NUMBER":
-                            Com.operands[i][j-count][0][5] = True
-                            Com.operands[i][j-count][1][5] = lst[k][0]
+                        #elif lst[k][1] == "NUMBER":
+                        #    Com.operands[i][j-count][0][5] = True
+                        #    Com.operands[i][j-count][1][5] = lst[k][0]
                         counter +=1
+                    count += 1
+
                 #if it has const (6 column)
                 elif lst[place][1] == "NUMBER":
                     Com.operands[i][j-count][0][5] = True
                     Com.operands[i][j-count][1][5] = lst[place][0]
+                    count +=1
                     if place == 1:
                         print("Error")
                         Com.error_flags.append(i)               #to do twice if there is no user id/label

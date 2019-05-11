@@ -202,9 +202,14 @@ def second_pass(row, sh):
             if byte_number.endswith("b") :              #in case binary
                 byte_number = hex(int(byte_number[:-1],2))[2:].upper()
             if byte_number.endswith("h"):                # in case hex
-                byte_number = hex(int(byte_number[:-1],16))[2:].upper() 
+                byte_number = hex(int(byte_number[:-1],16))[2:].upper()
             if byte_number.endswith("d"):                # in case demical 
-                byte_number = hex(int(byte_number[:-1], 10))[2:].upper() 
+                byte_number = hex(int(byte_number[:-1], 10))[2:].upper()
+            print(row[1][0])
+            if row[1][0] == "DB":
+                byte_number.rjust(2,'0')
+            elif row[1][0].upper() == "DW":
+                byte_number = byte_number.rjust(4,"0") 
             if byte_number.startswith("\"") and byte_number.endswith("\""):   #in case textconst
                 textconst = byte_number 
                 byte_number = " "
@@ -269,20 +274,32 @@ def second_pass(row, sh):
             mod = ""
             reg = ""
             rm = ""
+            segm_id = ""
+            numb = ""
+            print(Com.operands[sh])
             for i in range(len(Com.MNEM)):
-                if Com.MNEM[i] == "CMP":
-                    byte_number = int(Com.OPCODE[i], 16) 
+                if Com.MNEM[i] == "CMP":#TO DO NUMBERS [SI+1]
+                    byte_number = int(Com.OPCODE[i], 16)
             if Com.operands[sh][0][0][0] and Com.operands[sh][1][0][4] or Com.operands[sh][0][0][0] and Com.operands[sh][1][0][3] and row[3][0] in Com.data_user:  
                 if Com.operands[sh][0][1][0] == 16:
                     byte_number += 1
                 if Com.operands[sh][1][0][3]:
                     mod = "00"
                     rm = "110"
-                    reg = str(Com.operands[sh][0][2][0]).rjust(3,'0')
-                    number = hex(int(mod + reg + rm, 2))[2:].rjust(2,'0')
+                    reg = str(bin(Com.operands[sh][0][2][0]))[2:].rjust(3,'0')
+                if Com.operands[sh][1][0][2]:
+                    segm_id = Com.NUMBERS_FOR_REG[Com.NUMBERS_FOR_REG.index(Com.operands[sh][1][1][2])][:-1] + ":"
+             
                 if Com.operands[sh][1][0][4]:
                     mod = "01"
-                    reg = str(Com.operands[sh][0][2][0]).rjust(3,'0')
+                    reg = str(bin(Com.operands[sh][0][2][0]))[2:].rjust(3,"0")
+                    for word in row:
+                        if word[1] == "NUMBER":
+                            numb = hex(int(word[0]))[2:]
+                            if(len(numb) <= 2):
+                                numb = numb.rjust(2, '0')
+                            elif(len(numb) <= 4):
+                                numb = numb.rjust(4, '0')
                     if Com.operands[sh][1][1][4] == 6: # in case si
                         rm = "100"
                     elif Com.operands[sh][1][1][4] == 7: #in case di
@@ -294,6 +311,8 @@ def second_pass(row, sh):
                     else:                   #in case wrong adress register
                         Com.error_flags.append(sh+1)
                         print("inproper register")
+                byte_number = segm_id + hex(byte_number)[2:]
+                number = hex(int(mod + reg + rm, 2))[2:].rjust(2,'0') + " "+ numb
         if row[0][0] == "INC":
             if Com.operands[sh][0][0][0]:
                 if Com.operands[sh][0][1][0] == 16:
@@ -315,6 +334,35 @@ def second_pass(row, sh):
             for i in range(len(Com.MNEM)):
                 if Com.MNEM[i] == "JGE":
                     byte_number = Com.OPCODE[i]
-        #if row[0][0] == "DEC":
-    print(str(byte_number) + " " + number)        
+        if row[0][0] == "DEC":
+            mod = ""
+            reg = ""
+            rm = ""
+            for i in range(len(Com.MNEM)):
+                if Com.MNEM[i] == "DEC":
+                    byte_number = int(Com.OPCODE[i], 16) 
+            if Com.operands[sh][0][0][4] or  Com.operands[sh][0][0][3] and row[3][0] in Com.data_user:
+                if Com.operands[sh][0][0][3]:
+                    mod = "00"
+                    rm = "110"
+                    reg = str(Com.operands[sh][0][2][0]).rjust(3,'0')
+                elif Com.operands[sh][0][0][4]:
+                    mod = "01"
+                    reg = str(bin(Com.operands[sh][0][1][4]))[2:].rjust(3,'0')
+                    if Com.operands[sh][0][1][4] == 6: # in case si
+                        rm = "100"
+                    elif Com.operands[sh][0][1][4] == 7: #in case di
+                        rm = "101"
+                    elif Com.operands[sh][0][1][4] == 5: # in case bp
+                        rm = "110"
+                    elif Com.operands[sh][0][1][4] == 3: # in case bx
+                        rm = "111"
+                    else:                   #in case wrong adress register
+                        Com.error_flags.append(sh+1)
+                        print("inproper register")
+                else:
+                    Com.error_flags.append(sh+1)
+                byte_number = hex(byte_number)[2:]
+                number = hex(int(mod + reg + rm, 2))[2:].rjust(2,'0')
+    print(str(byte_number).upper() + " " + number.upper())        
     
