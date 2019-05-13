@@ -98,145 +98,114 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
     Com.operands[i][1].append(['', '', '', '', '',''])
     Com.operands[i][1].append(['', '', '', '', '',''])
     error_flag = True
+    left = right = 0
     if len(syn) >= 2: 
         if lst[0][1] == "MNEM":
-            count = 1                       #to control shift in operands table
-            for j in range(1, len(syn)):
-                place = syn[j][0]
-                if place >= len(lst):
-                    place-=1
-                if len(syn) == 3:
-                    count = j 
+            count = 0                      #to control shift in operands table
+            for place in range(1, len(lst)):
                
-                #if it contains register (1 row)
-
+                if lst[place][0] == ",":
+                    count+= 1
+                if count > 1:
+                    Com.error_flags.append(i)
+                    print("erroee")
+                    return
                 if lst[place][1] == "REGISTER16" and lst[place-1][0] != "[":
-                     Com.operands[i][j-count][0][0] = True
-                     Com.operands[i][j-count][1][0] = 16
+                     Com.operands[i][count][0][0] = True
+                     Com.operands[i][count][1][0] = 16
                      for com in range(len(Com.REGISTER16)):
                          if lst[place][0] == Com.REGISTER16[com]:
-                             Com.operands[i][j-count][2][0] = com
+                             Com.operands[i][count][2][0] = com
                              error_flag = False
                              break
-                     count += 1
-                             
+                     #count += 1
                      if error_flag:                         #to check
                          Com.error_flags.append(i)
+                         print("jhghjhgdfgjdjgdj")
                          return
                 elif lst[place][1] == "REGISTER8":
-                     Com.operands[i][j-count][0][0] = True
-                     Com.operands[i][j-count][1][0] = 8
+                     Com.operands[i][count][0][0] = True
+                     Com.operands[i][count][1][0] = 8
                      for com in range(len(Com.REGISTER8)):
                          if lst[place][0] == Com.REGISTER8[com]:
-                             Com.operands[i][j-count][2][0] = com
+                             Com.operands[i][count][2][0] = com
                              error_flag = False
                              break
-                     count += 1
+                     #count += 1
                      if error_flag:                 
                          Com.error_flags.append(i)
                          print("not register")
                          return
                 #if it contains label or user id (4 column)
                 elif lst[place][1] == "USER" or lst[place][1] == "USER_MACRO_PARAM":
-                    for k in range(len(Com.user_list)):
-                        if Com.user_list[k].upper() == lst[place][0]:
-                            Com.operands[i][j-count][0][3] = True
-                            Com.operands[i][j-count][1][3] = k
+                    for k in range(len(Com.data_user)):
+                        if Com.data_user[k].upper() == lst[place][0]:
+                            Com.operands[i][count][0][3] = True
+                            Com.operands[i][count][1][3] = k
                             break
+             
 
                     for k in range(len(Com.macro_fact_param)):
                         if Com.macro_fact_param[k][1].upper() == lst[place][0]:
-                            Com.operands[i][j-count][0][3] = True
-                            Com.operands[i][j-count][1][3] = k
-                            break   
+                            for reg in Com.REGISTER16:
+                                if reg == lst[place][0]:
+                                    Com.operands[i][count][0][0] = True
+                                    Com.operands[i][count][1][0] = 16
+                                    Com.operands[i][count][2][0] = Com.REGISTER16.index(lst[place][0])
+                                    break
+                            if not Com.operands[i][count][0][0]:
+                                Com.operands[i][count][0][3] = True
+                                Com.operands[i][count][1][3] = k
+                                break   
                            ########################################
                     for k in range(len(Com.macro_param)):
                         if Com.macro_param[k].upper() == lst[place][0]:
-                            Com.operands[i][j-count][0][3] = True
-                            Com.operands[i][j-count][1][3] = k
+                            Com.operands[i][count][0][3] = True
+                            Com.operands[i][count][1][3] = k
                             break
-                         
-                    if lst[place][0] in Com.REGISTER16:
-                        Com.operands[i][j-count][0][0] = True
-                        Com.operands[i][j-count][1][0] = 16
-                        for com in range(len(Com.REGISTER16)):
-                            if lst[place][0] == Com.REGISTER16[com]:
-                                Com.operands[i][j-count][2][0] = com
-                                 ######################
-                                Com.operands[i][j-count][0][3] = False
-                                Com.operands[i][j-count][1][3] = ''
-                                ######################
-                                error_flag = False
-                                break
-                    if lst[place][0] in Com.REGISTER8:
-                        Com.operands[i][j-count][0][0] = True
-                        Com.operands[i][j-count][1][0] = 8
-                        for com in range(len(Com.REGISTER8)):
-                            if lst[place][0] == Com.REGISTER8[com]:
-                                Com.operands[i][j-count][2][0] = com
-                                ######################
-                                Com.operands[i][j-count][0][3] = False
-                                Com.operands[i][j-count][1][3] = ''
-                                #####################
-                                error_flag = False
-                                break    
-                                ######################################
-                    count += 1
-                elif syn[j][1] > 1: 
-                    place = j
                     #if it contains ptr (2 column) 
-                    if lst[place][0] == "PTR":#to check
-                        for k in range(4,len(Com.DIRECTIVE)):
-                            if lst[place-1][0] == Com.DIRECTIVE[k]:
-                                Com.operands[i][j-count][0][1] = True
-                                Com.operands[i][j-count][1][1] = Com.DIRECTIVE[k]
-                    #if it contains segment prefix (3 column)
-                    for k in range(len(Com.ID_SEGMENT)):
-                        if Com.ID_SEGMENT[k] == lst[place][0]:
-                            Com.operands[i][j-count][0][2] = True
-                            Com.operands[i][j-count][1][2] = Com.NUMBERS_FOR_REG[k]
-                            break
-                    left = 0
-                    right = 0
-                    for k in range(len(lst)):
-                        if lst[k][0] == "[":
-                            left +=1
-                        if lst[k][1] == "REGISTER16" and left>0: #TOOOOOOOOOOOOOOOOOOOOOOOOOO DOOOOOOOOOOOOOOOOOOOOOOOOOOOO CMP BL, [SI+1]
-                            Com.operands[i][j-count][0][4] = True
-                            Com.operands[i][j-count][1][4] = Com.REGISTER16.index(lst[k][0])
-                        if lst[k][0] == "]" and left >= right:
-                            right+=1
-                    if left != right:
-                        Com.error_flags.append(i)
-                        print("brackets")
-                        return
-                    counter = 0
-                    for k in range(len(syn), syn[2][1]):
-                        if lst[k][1] == "REGISTER16":
-                            if syn[2][1] >= 5:
-                                count -= 1
-                             #cause count increments two times because of ig_segment and ptr
-                            Com.operands[i][j-count][0][4] = True
-                            Com.operands[i][j-count][1][4] = Com.NUMBERS_FOR_REG[counter]
-                        elif lst[k][1] == "REGISTER8":
-                            Com.operands[i][j-count][0][4] = True
-                            Com.operands[i][j-count][1][4] = Com.NUMBERS_FOR_REG[counter]
-                        #elif lst[k][1] == "NUMBER":
-                        #    Com.operands[i][j-count][0][5] = True
-                        #    Com.operands[i][j-count][1][5] = lst[k][0]
-                        counter +=1
-                    count += 1
-
+                elif lst[place][0] == "PTR":#to check
+                    for k in range(4,len(Com.DIRECTIVE)):
+                        if lst[place-1][0] == Com.DIRECTIVE[k]:
+                            Com.operands[i][count][0][1] = True
+                            Com.operands[i][count][1][1] = Com.DIRECTIVE[k]
+                #if it contains segment prefix (3 column)
+                for k in range(len(Com.data_user)):# in case DEC WORD PTR VW
+                    if Com.data_user[k] == lst[place][0]:
+                        Com.operands[i][count][0][3] = True
+                        Com.operands[i][count][1][3] = k
+                        break
+                            # in dec word ptr ES:[si+1] wrong second Com.operands
+                for k in range(len(Com.ID_SEGMENT)):
+                    if Com.ID_SEGMENT[k] == lst[place][0]:
+                        Com.operands[i][count][0][2] = True
+                        Com.operands[i][count][1][2] = Com.NUMBERS_FOR_REG[k]
+                        break
+       
+                if lst[place][0] == "[":
+                    left +=1
+                    #left_in = k
+                if lst[place][1] == "REGISTER16" and left>0 and left != right:
+                        Com.operands[i][count][0][4] = True
+                        Com.operands[i][count][1][4] = Com.REGISTER16.index(lst[place][0])
+                if lst[place][0] == "]" and left >= right:
+                    right+=1
+               
                 #if it has const (6 column)
                 elif lst[place][1] == "NUMBER":
-                    Com.operands[i][j-count][0][5] = True
-                    Com.operands[i][j-count][1][5] = lst[place][0]
-                    count +=1
-                    if place == 1:
-                        print("Error")
-                        Com.error_flags.append(i)               #to do twice if there is no user id/label
-                        print("number")
-                        continue
+                    if place == len(lst)-1:
+                        Com.operands[i][count][0][5] = True
+                        Com.operands[i][count][1][5] = lst[place][0]
+                        count +=1
+                        if place == 1:
+                            print("Error")
+                            Com.error_flags.append(i)               #to do twice if there is no user id/label
+                            print("number")
+                            continue
+            if left != right:
+                    Com.error_flags.append(i)
+                    print("brackets")
+                    return
 
 
 def print_operands():
