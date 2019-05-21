@@ -38,7 +38,7 @@ def syntax_check(lex_list):
                 table[pos][fl][1] += 1
             else:
                 Com.error_flags.append(pos+1)
-              #  print("meh")
+                print("meh")
                 break
             count += 1
        #list_print(i)
@@ -76,12 +76,7 @@ def row_print(i, lex_list, pos):
         for k in j:
             print('     %d     ' % (k), sep ='', end ='')
     print()
-def list_print(i):
-    for j in i:
-        if not j: 
-            continue
-        print (j[0], " ", end ='')
-    print()
+
 
 def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analysis
     # 1 - reg
@@ -138,31 +133,36 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                          return
                 #if it contains label or user id (4 column)
                 elif lst[place][1] == "USER" or lst[place][1] == "USER_MACRO_PARAM":
-                    for k in range(len(Com.data_user)):
-                        if Com.data_user[k].upper() == lst[place][0]:
-                            Com.operands[i][count][0][3] = True
-                            Com.operands[i][count][1][3] = k
-                            break
-             
 
-                    for k in range(len(Com.macro_fact_param)):
-                        if Com.macro_fact_param[k][1].upper() == lst[place][0]:
-                            for reg in Com.REGISTER16:
-                                if reg == lst[place][0]:
-                                    Com.operands[i][count][0][0] = True
-                                    Com.operands[i][count][1][0] = 16
-                                    Com.operands[i][count][2][0] = Com.REGISTER16.index(lst[place][0])
-                                    break
-                            if not Com.operands[i][count][0][0]:
+                    if lst[place][1] == "USER":
+                        for k in range(len(Com.data_user)):
+                            if Com.data_user[k] == lst[place][0]:
                                 Com.operands[i][count][0][3] = True
                                 Com.operands[i][count][1][3] = k
-                                break   
-                           ########################################
-                    for k in range(len(Com.macro_param)):
-                        if Com.macro_param[k].upper() == lst[place][0]:
+                                break
+                        if not Com.operands[i][count][0][3] and lst[place-1][0] != "JGE":
+                            #Com.error_flags.append(i)
                             Com.operands[i][count][0][3] = True
-                            Com.operands[i][count][1][3] = k
-                            break
+                            print("kek")
+                    else:
+                        for k in range(len(Com.macro_fact_param)):
+                            if Com.macro_fact_param[k][1].upper() == lst[place][0]:
+                                for reg in Com.REGISTER16:
+                                    if reg == lst[place][0]:
+                                        Com.operands[i][count][0][0] = True
+                                        Com.operands[i][count][1][0] = 16
+                                        Com.operands[i][count][2][0] = Com.REGISTER16.index(lst[place][0])
+                                        break
+                                if not Com.operands[i][count][0][0]:
+                                    Com.operands[i][count][0][3] = True
+                                    Com.operands[i][count][1][3] = k
+                                    break   
+                                ########################################
+                        for k in range(len(Com.macro_param)):
+                            if Com.macro_param[k].upper() == lst[place][0]:
+                                Com.operands[i][count][0][3] = True
+                                Com.operands[i][count][1][3] = k
+                                break
                     #if it contains ptr (2 column) 
                 elif lst[place][0] == "PTR":#to check
                     for k in range(4,len(Com.DIRECTIVE)):
@@ -190,7 +190,6 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         Com.operands[i][count][1][4] = Com.REGISTER16.index(lst[place][0])
                 if lst[place][0] == "]" and left >= right:
                     right+=1
-               
                 #if it has const (6 column)
                 elif lst[place][1] == "NUMBER":
                     if place == len(lst)-1:
