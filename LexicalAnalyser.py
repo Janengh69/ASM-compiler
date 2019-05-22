@@ -242,17 +242,17 @@ def list_to_table(lst):
                                 if len(word) == 2:
                                     param = word[1]
                                     Com.macro_fact_param.append([word[0], param])      #for grammar analysis
-                                  #  print(Com.macro_fact_param)
                                 param_flag = False
                                 for x in Com.macro_buf[k]:
-                                        row = macro_to_lex(x)               #lexical analysis for macro 
-                                        if row != None:
-                                            for rw in row:                  #replacing formal parametr into actual one
-                                                if rw[1] == "USER_MACRO_PARAM":
-                                                    rw[0] = param.upper()
-                                            result.append(row)
-                                            pos+=1
-                                            count_macro +=1
+                                    #Com.macro_call.append(pos)                                      
+                                    row = macro_to_lex(x)               #lexical analysis for macro 
+                                    if row != None:
+                                        for rw in row:                  #replacing formal parametr into actual one
+                                            if rw[1] == "USER_MACRO_PARAM":
+                                                rw[0] = param.upper()
+                                        result.append(row)
+                                        pos+=1
+                                        count_macro +=1
                                 break
                             row = [word[i].upper(), "USER_MACRO", len(word[i])]
                             user_marco = True

@@ -1,5 +1,4 @@
 import Common as Com
-#ask about macro parametr
 def syntax_check(lex_list):
     table = list()
     pos = 0
@@ -9,13 +8,12 @@ def syntax_check(lex_list):
        table.append([])
        table[pos].append([])
        table[pos].append([])
-      
        for j in range(len(i)):
             if not i[j]:
                 continue
             if(i[j] and'UNDEFINED' in i[j][1] ):
-                Com.error_flags.append(pos+1)         #in case we meet underfined world
-                print("underfined")
+                Com.error_flags.append(pos)         #in case we meet underfined world
+                #print("underfined")
                 pos += 1
                 continue
             if((j == 0 and i[j][1] == 'USER') or (j == 0 and i[j][1] == 'USER_MACRO') or i[j][1] == 'SEGMENT_USER' or (j != len(i)-1 and i[j][1] == 'USER' and i[j+1][0] == ':')): 
@@ -37,35 +35,15 @@ def syntax_check(lex_list):
                     fl = 3
                 table[pos][fl][1] += 1
             else:
-                Com.error_flags.append(pos+1)
-                print("meh")
+                Com.error_flags.append(pos)
+                #print("meh")
                 break
             count += 1
-       #list_print(i)
-       #row_print(table[pos], lex_list, pos)
        pos += 1 
     return table
-    #sentences_syntax_print(table)
-   
-def sentences_syntax_print(table):
-        print('\n')
-        print('LABELS,ID        MNEM             1 OPERAND            2 OPERAND      ')
-        print('----------------------------------------------------------------------------')
-        print('   №LEX    1st  lex        №       1st lex       №       1st lex        №')
-        print('----------------------------------------------------------------------------')
-        for i in table:
-            for j in i:
-                if(j == []):
-                    print('     -     ', end ='')
-                for k in j:
-                    print('     %d     ' % (k), sep ='', end ='')
-            print()
-        
-        print('Error flags:', Com.error_flags)
 
 def row_print(i, lex_list, pos):
     print(lex_list[pos])
-   
     print('LABELS,ID           MNEM                  1 OPERAND              2 OPERAND      ')
     print('----------------------------------------------------------------------------')
     print('   №LEX      1st  lex    quantity    1st lex   quantity     1st lex   quantity')
@@ -103,7 +81,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                     count+= 1
                 if count > 1:
                     Com.error_flags.append(i)
-                    print("erroee")
+                    #print("erroee")
                     return
                 if lst[place][1] == "REGISTER16" and lst[place-1][0] != "[":
                      Com.operands[i][count][0][0] = True
@@ -116,7 +94,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                      #count += 1
                      if error_flag:                         #to check
                          Com.error_flags.append(i)
-                         print("jhghjhgdfgjdjgdj")
+                        # print("jhghjhgdfgjdjgdj")
                          return
                 elif lst[place][1] == "REGISTER8":
                      Com.operands[i][count][0][0] = True
@@ -129,7 +107,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                      #count += 1
                      if error_flag:                 
                          Com.error_flags.append(i)
-                         print("not register")
+                         #print("not register")
                          return
                 #if it contains label or user id (4 column)
                 elif lst[place][1] == "USER" or lst[place][1] == "USER_MACRO_PARAM":
@@ -197,13 +175,13 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         Com.operands[i][count][1][5] = lst[place][0]
                         count +=1
                         if place == 1:
-                            print("Error")
+                           # print("Error")
                             Com.error_flags.append(i)               #to do twice if there is no user id/label
-                            print("number")
+                            #print("number")
                             continue
             if left != right:
                     Com.error_flags.append(i)
-                    print("brackets")
+                   # print("brackets")
                     return
 
 
