@@ -47,15 +47,12 @@ def macro_search(lst):
                 Com.macro_user.append([lst[row][0], row])
                 if len(lst[row]) > 2:                    # in case MACRO has parametrs
                     Com.macro_param.append(lst[row][2])
-                #Com.macro_buf[count].append(row)
                 continue
             elif len(lst[row]) == 2 and lst[row][0].upper() == "MACRO":
                 Com.error_flags.append(row+1)
-                #print("macro1")
                 continue
             else:
                  Com.error_flags.append(row+1)
-                 #print("macro")
                  continue
 
         if macro_flag:      #recording all the MACRO in macro_buf list
@@ -66,56 +63,6 @@ def macro_search(lst):
     #print(Com.macro_buf)
    # print(Com.macro_user)
    # print(Com.macro_param)
-        
-def check_is_mnem(word):
-    for temp in Com.MNEM:
-        for temp in Com.MNEM:
-            if word.upper() == temp:
-                return True
-        return False
-def check_is_symbol(word):
-    for temp in Com.SYMBOLS:
-        for temp in Com.SYMBOLS:
-            if word == temp:
-                return True
-        return False
-def check_is_directive(word):
-    for temp in Com.DIRECTIVE:
-        for temp in Com.DIRECTIVE:
-            if word.upper() == temp:
-                return True
-        return False
-def check_is_register8(word):
-    for temp in Com.REGISTER8:
-        for temp in Com.REGISTER8:
-            if word.upper() == temp:
-                return True
-        return False
-def check_is_register16(word):
-    for temp in Com.REGISTER16:
-        for temp in Com.REGISTER16:
-            if word.upper() == temp:
-                return True
-        return False
-def check_is_macro(word):
-    for temp in Com.MACRO:
-        for temp in Com.MACRO:
-            if word.upper() == temp:
-
-                return True
-        return False
-def check_is_segment_id(word):
-    for temp in Com.ID_SEGMENT:
-        for temp in Com.ID_SEGMENT:
-            if word.upper() == temp:
-                return True
-        return False
-def check_is_segment(word):
-    for temp in Com.SEGMENT:
-        for temp in Com.SEGMENT:
-            if word.upper() == temp:
-                return True
-        return False
 
 def output(list1):
     for row in list1:
@@ -151,20 +98,20 @@ def list_to_table(lst):
         for i in range(len(word)):      #describing every word (lexical analysis)
             if program_works:
                 row = list()
-                if check_is_mnem(word[i]):
+                if word[i].upper() in Com.MNEM:
                     row = [word[i].upper(), "MNEM", len(word[i])]
                     flag = True
                     param_flag = True              
-                elif check_is_macro(word[i]) and Com.segment_flag:
+                elif word[i].upper() in Com.MACRO and Com.segment_flag:
                     row = [ word[i].upper(), "MACRO", len(word[i])]
                     flag = True
-                elif check_is_segment_id(word[i])and Com.segment_flag:
+                elif word[i].upper() in Com.ID_SEGMENT and Com.segment_flag:
                     row = [ word[i].upper(), "ID_SEGMENT", len(word[i])]
                     flag = True
-                elif check_is_directive(word[i])and Com.segment_flag:
+                elif word[i].upper() in Com.DIRECTIVE and Com.segment_flag:
                     row = [ word[i].upper(), "DIRECTIVE", len(word[i])]
                     flag = True
-                elif check_is_segment(word[i]):
+                elif word[i].upper() in Com.SEGMENT:
                     row = [word[i].upper(), "SEGMENT", len(word[i])]
                     Com.active_seg+=1
                     if len(word) == 2 and word[i].upper() == "SEGMENT": #to doo
@@ -181,13 +128,11 @@ def list_to_table(lst):
                     if len(word) == 1 and word[i].upper() != "END":        # in case user forgot to name segment
                         Com.error_flags.append(pos - count_macro+1)
                         Com.segment_flag = False   
-                        #print("end")
 
                     elif Com.active_seg%2 == 0 and word[i].upper() == "END" or Com.active_seg%2 == 0 and word[i].upper() != "ENDS": #in case user forgot to close segment
                         Com.error_flags.append(pos-count_macro+1)
                         Com.segment_flag = False
                         Com.active_seg +=1
-                        #print("ends")
 
                     elif Com.active_seg%2 == 0 and word[i].upper() == "ENDS":        #if segment ends
                         for usr in Com.segment_user:
@@ -204,7 +149,7 @@ def list_to_table(lst):
                         program_works = False    
                     flag = True
 
-                elif check_is_symbol(word[i])and Com.segment_flag:
+                elif word[i].upper() in Com.SYMBOLS and Com.segment_flag:
                     row = [ word[i], "SYMBOL", len(word[i])]
                     if len(word) == 1:
                         Com.error_flags.append(pos-count_macro+1)
@@ -213,10 +158,10 @@ def list_to_table(lst):
                     if i == len(word)-1 and word[i] != ']' and  word[i] != ':':
                         Com.error_flags.append(pos-count_macro+1)
                     flag = True
-                elif check_is_register8(word[i])and Com.segment_flag:
+                elif word[i].upper() in Com.REGISTER8 and Com.segment_flag:
                     row = [ word[i].upper(), "REGISTER8", len(word[i])]
                     flag = True
-                elif check_is_register16(word[i])and Com.segment_flag:
+                elif word[i].upper() in Com.REGISTER16 and Com.segment_flag:
                     row = [ word[i].upper(), "REGISTER16", len(word[i])]
                     flag = True
                 elif word[i] == '':
@@ -299,7 +244,6 @@ def list_to_table(lst):
 
             else:
                 Com.error_flags.append(pos - count_macro +1)
-                #print("end of programm")
         pos +=1
     result = [x for x in result if x != []] #clearing empty lists 
     Com.user_list = list(user_list)
@@ -314,28 +258,28 @@ def macro_to_lex(lst):
     for word in lst:
         if word:
             row = list()
-            if check_is_mnem(word):
+            if word.upper() in Com.MNEM:
                 row = [word.upper(), "MNEM", len(word)]
                 flag = True
-            elif check_is_macro(word):
+            elif word.upper() in Com.MACRO:
                 row = [ word.upper(), "MACRO", len(word)]
                 flag = True
-            elif check_is_segment_id(word):
+            elif word.upper() in Com.ID_SEGMENT:
                 row = [ word.upper(), "ID_SEGMENT", len(word)]
                 flag = True
-            elif check_is_directive(word):
+            elif word.upper() in Com.DIRECTIVE:
                 row = [ word.upper(), "DIRECTIVE", len(word)]
                 flag = True
-            elif check_is_segment(word):
+            elif word.upper() in Com.SEGMENT:
                 row = [ word.upper(), "SEGMENT", len(word)]
                 flag = True
-            elif check_is_symbol(word):
+            elif word.upper() in Com.SYMBOLS:
                 row = [ word, "SYMBOL", len(word)]
                 flag = True
-            elif check_is_register8(word):
+            elif word.upper() in Com.REGISTER8:
                 row = [ word.upper(), "REGISTER8", len(word)]
                 flag = True
-            elif check_is_register16(word):
+            elif word.upper() in Com.REGISTER16:
                 row = [ word.upper(), "REGISTER16", len(word)]
                # flag = True
             elif word == '':

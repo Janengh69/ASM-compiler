@@ -66,17 +66,15 @@ def shift_count(word, sh):
                         Com.shift += 4*text_sh
                     else:
                         Com.error_flags.append(sh)
-                        #print("not variable")
             if word[i][1].upper() == "MNEM":
                 if word[i][0].upper() == "MOV": #reg - imm 
                     if Com.operands[sh][0][0][0] and Com.operands[sh][1][0][5]:   
                         if Com.operands[sh][0][1][0] == 8:
-                            Com.shift += 1                          #Com.REGISTER8.index(word[i+1][0]) 
+                            Com.shift += 1                     
                         elif Com.operands[sh][0][1][0] == 16:
-                                Com.shift += 2                         # Com.REGISTER16.index(word[i+1][0])
+                                Com.shift += 2                    
                         else:
                             Com.error_flags.append(sh)
-                            #print("not right operand")
                             continue
                         if Com.operands[sh][1][1][5].endswith("h"):
                             if int(str(Com.operands[sh][1][1][5][:len(Com.operands[sh][1][1][5])-1]).upper(), 16) < 255:
@@ -98,7 +96,6 @@ def shift_count(word, sh):
                             Com.shift += 2   
                     else:
                         Com.error_flags.append(sh)
-                        #print("not right const")
                         continue
                 if word[i][0].upper() == "CMP" : # cmp reg, mem 
                     # the first register                the second user_id                                      segment id                                                  operand has ptr                                                          
@@ -112,7 +109,6 @@ def shift_count(word, sh):
                             if Com.operands[sh][1][1][2] == "36h" and Com.operands[sh][1][1][4] == 5:
                                 Com.shift -= 1
                             Com.shift+=1
-                            #################
                         if Com.operands[sh][1][0][4]:
                             Com.shift += 1
                             if word[len(word)-2][1] == "NUMBER":
@@ -124,11 +120,7 @@ def shift_count(word, sh):
                                 Com.shift += 1
                         else: 
                             Com.error_flags.append(sh)
-                            #print("not right reg")
-                    #else:
-                    #    Com.error_flags.append(sh)
                     elif Com.operands[sh][1][0][0] and    Com.operands[sh][0][0][3] or Com.operands[sh][1][0][0] and Com.operands[sh][0][0][2] or Com.operands[sh][1][0][0] and Com.operands[sh][0][0][1] or Com.operands[sh][1][0][0] and Com.operands[sh][0][0][4]: 
-                        #Com.shift += 1
                         if Com.operands[sh][0][0][3]: # user id
                             Com.shift += 3
                         if  Com.operands[sh][0][0][2]:# id segment 
@@ -137,7 +129,6 @@ def shift_count(word, sh):
                             if Com.operands[sh][0][1][2] == "36h" and Com.operands[sh][0][1][4] == 5:
                                 Com.shift -= 1
                             Com.shift+=1
-                            #################
                         if Com.operands[sh][0][0][4]:
                             Com.shift += 1
                             if word[len(word)-2][1] == "NUMBER":
@@ -149,10 +140,8 @@ def shift_count(word, sh):
                                 Com.shift += 1
                         else: 
                             Com.error_flags.append(sh)
-                            #print("not right reg")
                     else:
                         Com.error_flags.append(sh)
-                        #print("not right operand")
                 if word[i][0].upper() == "JGE":
                     if len(word) == 2:
                         if Com.label_berofe_assigm:
@@ -183,9 +172,7 @@ def shift_count(word, sh):
                         if Com.operands[sh][0][0][4]:#add reg
                             Com.shift += 1
                     else:
-                        Com.error_flags.append(sh)
-                        #print("not right reg")
-                                                    #  the second one is number
+                        Com.error_flags.append(sh) #  the second one is number
                 if word[i][0].upper() == "OR" and Com.operands[sh][1][0][5]: # mem-imm
                     Com.shift += 2
                     if Com.operands[sh][0][0][3]: #user id 
@@ -197,13 +184,11 @@ def shift_count(word, sh):
                                 Com.shift -= 1
                         Com.shift+=1
                     if Com.operands[sh][0][0][4]:
-                        #Com.shift += 1
                         if word[len(word)-4][1] == "NUMBER":
                             if int(word[len(word)-4][0]) <= 255:
                                 Com.shift +=1
                             else: 
                                 Com.shift += 2
-                                #print("kek")
                     if Com.operands[sh][1][0][5]:
                         if Com.operands[sh][1][1][5].endswith("h"):
                            if int(Com.operands[sh][1][1][5][:-1], 16) > 255:
@@ -239,7 +224,6 @@ def shift_count(word, sh):
                                 Com.shift += 1
                             else: 
                                 Com.error_flags.append(sh)
-                                #print("inproper parametr")
                                 continue
                     Com.shift += 2
                 if word[i][0].upper() == "INC" and  Com.operands[sh][0][0][0]:
@@ -254,13 +238,11 @@ def shift_count(word, sh):
                             Com.shift += 1
                         else: 
                             Com.error_flags.append(sh)
-                            #print("inproper parametr")
                             continue
                 if word[i][0].upper() == "MOVSW":
                     Com.shift += 1
                     if len(word) != 1:
                         Com.error_flags.append(sh)
-                        #print("movws doesnt accept parametrs")
     if word[0][1] != "SEGMENT_USER":
         number = '00' + format(Com.shift, '02x').upper()
     else: 
@@ -332,7 +314,7 @@ def second_pass(row, sh):
             for i in range(len(Com.MNEM)):
                 if Com.MNEM[i] == "MOV":
                     byte_number = int(Com.OPCODE[i], 16)                                #getting opcode 
-            if Com.operands[sh][0][0][0] and Com.operands[sh][1][0][5]:#if first is register and the second is the const
+            if Com.operands[sh][0][0][0] and Com.operands[sh][1][0][5]:                 #if first is register and the second is the const
                 byte_number += Com.operands[sh][0][2][0]                                #including the register byte_number
                 temp = Com.operands[sh][1][1][5]   
                 max = 65536
@@ -374,20 +356,17 @@ def second_pass(row, sh):
                     byte_number += 8
                     if len(str(temp)) > 4:
                         Com.error_flags.append(sh)                                #in case overflow
-                        #print("oveflow")
                     else:
                         byte_number = str(hex(byte_number)[2:])
                         number  = temp.rjust(4,'0').upper()   
                 elif Com.operands[sh][0][1][0] == 8:                                #in case 8register
                     if len(str(temp)) > 2:
                         Com.error_flags.append(sh)                                #in case overflow
-                        #print("oveflow")
                     else:
                         byte_number = str(hex(byte_number)[2:])
                         number  = temp.rjust(2,'0').upper()
                 else:
                     Com.error_flags.append(sh)
-                    #print("wrong")
                     return
         if row[0][0] == "ADD":
             for i in range(len(Com.MNEM)):
@@ -402,7 +381,6 @@ def second_pass(row, sh):
                 byte_number = str(byte_number).rjust(2, '0')
             else:
                 Com.error_flags.append(sh)
-                print("Ilegal operand")
         if row[0][0] == "CMP":
             mod = reg = rm = segm_id = numb = type = ""
             for i in range(len(Com.MNEM)):
@@ -448,7 +426,6 @@ def second_pass(row, sh):
                         rm = "111"
                     else:                   #in case wrong adress register
                         Com.error_flags.append(sh)
-                        print("inproper register")
                 byte_number = segm_id + hex(byte_number)[2:]
                 number = hex(int(mod + reg + rm, 2))[2:].rjust(2,'0').upper() + " "+ numb
 
@@ -492,12 +469,10 @@ def second_pass(row, sh):
                         rm = "111"
                     else:                   #in case wrong adress register
                         Com.error_flags.append(sh)
-                        print("inproper register")
                 byte_number = segm_id + hex(byte_number)[2:]
                 number = hex(int(mod + reg + rm, 2))[2:].rjust(2,'0').upper() + " "+ numb
             else:
                 Com.error_flags.append(sh)
-                print("inproper cmpF")
         if row[0][0] == "INC":
             mod = reg = rm = ""
             number = ""
@@ -515,7 +490,6 @@ def second_pass(row, sh):
                             number = hex(int(mod + reg + rm, 2))[2:].rjust(2,'0').upper() + " "
             else: 
                 Com.error_flags.append(sh)
-                #print("sdlkjls")
             if byte_number:
                 byte_number = hex(byte_number)[2:]
         if row[0][0] == "MOVSW":
@@ -567,7 +541,6 @@ def second_pass(row, sh):
                     rm = "111"
                 else:                   #in case wrong adress register
                     Com.error_flags.append(sh)
-                    print("inproper register")
             elif  Com.operands[sh][0][0][3]:# in case user id 
                 if Com.data[Com.operands[sh][0][1][3]][1][0] == "DD":
                         Com.error_flags.append(sh)
@@ -576,15 +549,12 @@ def second_pass(row, sh):
                 reg = "001"
                 if Com.user_type_dict.get(row[1][0]) == "DW" or Com.user_type_dict.get(row[1][0]) == "DD":
                     byte_number += 1
-                #if len(row) == 2:
                 if row[len(row)-1][0] in Com.data_user:
                     numb = Com.user_dict.get(Com.data_user[Com.operands[sh][0][1][3]]).upper() + "r"
                 else:
                     Com.error_flags.append(sh)
-                    #print("inproper operand in dec")
             else:
                 Com.error_flags.append(sh)
-                #print("skldjgkls")
             byte_number = segm_id + " " + hex(byte_number)[2:]
             if mod and reg and rm:
                 number = hex(int(mod + reg + rm, 2))[2:].rjust(2,'0').upper() + " " + numb
@@ -613,7 +583,6 @@ def second_pass(row, sh):
                             Com.error_flags.append(sh)
                     else: 
                         Com.error_flags.append(sh)
-                        #print("and error")
                 if Com.operands[sh][0][0][2]:
                     if Com.operands[sh][0][1][2] != "3Eh":# and Com.operands[sh][1][1][4] == 5:
                         segm_id = Com.NUMBERS_FOR_REG[Com.NUMBERS_FOR_REG.index(Com.operands[sh][0][1][2])][:-1] + ":"
@@ -641,7 +610,6 @@ def second_pass(row, sh):
                         rm = "111"
                     else:                   #in case wrong adress register
                         Com.error_flags.append(sh)
-                        print("inproper register")
                 if byte_number:
                     byte_number = segm_id + hex(byte_number)[2:]
                     number = hex(int(mod + reg + rm, 2))[2:].rjust(2,'0').upper() + " "+ numb
@@ -707,7 +675,6 @@ def second_pass(row, sh):
                             Com.error_flags.append(sh)
                         if temp > 255:
                             Com.error_flags.append(sh)
-                            #print("constant too large")
                         elif temp < 127 and Com.data[Com.operands[sh][0][1][3]][1][0] != "DB":
                             byte_number = 131
                         if Com.data[Com.operands[sh][0][1][3]][1][0] == "DB":
@@ -720,7 +687,6 @@ def second_pass(row, sh):
                         numb = Com.user_dict.get(Com.data_user[Com.operands[sh][0][1][3]]).upper() + "r" 
                     else: 
                         Com.error_flags.append(sh)
-                        #print("no user id in data segment")
                 if Com.operands[sh][0][0][1] and not Com.operands[sh][0][0][3]:
                     temp = hex(temp)[2:]
                     if Com.operands[sh][0][1][1].upper() == "WORD":

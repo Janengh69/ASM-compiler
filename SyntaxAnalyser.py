@@ -13,7 +13,6 @@ def syntax_check(lex_list):
                 continue
             if(i[j] and'UNDEFINED' in i[j][1] ):
                 Com.error_flags.append(pos)         #in case we meet underfined world
-                #print("underfined")
                 pos += 1
                 continue
             if((j == 0 and i[j][1] == 'USER') or (j == 0 and i[j][1] == 'USER_MACRO') or i[j][1] == 'SEGMENT_USER' or (j != len(i)-1 and i[j][1] == 'USER' and i[j+1][0] == ':')): 
@@ -36,7 +35,6 @@ def syntax_check(lex_list):
                 table[pos][fl][1] += 1
             else:
                 Com.error_flags.append(pos)
-                #print("meh")
                 break
             count += 1
        pos += 1 
@@ -64,12 +62,12 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
     # 5 - addr reg
     # 6 - const
     Com.operands.append([[],[]])
-    Com.operands[i][0].append([False, False, False, False, False, False])
-    Com.operands[i][0].append(['', '', '', '', '',''])
-    Com.operands[i][0].append(['', '', '', '', '',''])
-    Com.operands[i][1].append([False, False, False, False, False, False])
-    Com.operands[i][1].append(['', '', '', '', '',''])
-    Com.operands[i][1].append(['', '', '', '', '',''])
+    Com.operands[i][0].append([False]*6)
+    Com.operands[i][0].append(['']*6)
+    Com.operands[i][0].append(['']*6)
+    Com.operands[i][1].append([False]*6)
+    Com.operands[i][1].append(['']*6)
+    Com.operands[i][1].append(['']*6)
     error_flag = True
     left = right = 0
     if len(syn) >= 2: 
@@ -81,7 +79,6 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                     count+= 1
                 if count > 1:
                     Com.error_flags.append(i)
-                    #print("erroee")
                     return
                 if lst[place][1] == "REGISTER16" and lst[place-1][0] != "[":
                      Com.operands[i][count][0][0] = True
@@ -91,10 +88,8 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                              Com.operands[i][count][2][0] = com
                              error_flag = False
                              break
-                     #count += 1
                      if error_flag:                         #to check
                          Com.error_flags.append(i)
-                        # print("jhghjhgdfgjdjgdj")
                          return
                 elif lst[place][1] == "REGISTER8":
                      Com.operands[i][count][0][0] = True
@@ -104,10 +99,8 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                              Com.operands[i][count][2][0] = com
                              error_flag = False
                              break
-                     #count += 1
                      if error_flag:                 
                          Com.error_flags.append(i)
-                         #print("not register")
                          return
                 #if it contains label or user id (4 column)
                 elif lst[place][1] == "USER" or lst[place][1] == "USER_MACRO_PARAM":
@@ -121,7 +114,6 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         if not Com.operands[i][count][0][3] and lst[place-1][0] != "JGE":
                             #Com.error_flags.append(i)
                             Com.operands[i][count][0][3] = True
-                            print("kek")
                     else:
                         for k in range(len(Com.macro_fact_param)):
                             if Com.macro_fact_param[k][1].upper() == lst[place][0]:
@@ -135,7 +127,6 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                                     Com.operands[i][count][0][3] = True
                                     Com.operands[i][count][1][3] = k
                                     break   
-                                ########################################
                         for k in range(len(Com.macro_param)):
                             if Com.macro_param[k].upper() == lst[place][0]:
                                 Com.operands[i][count][0][3] = True
@@ -162,7 +153,6 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
        
                 if lst[place][0] == "[":
                     left +=1
-                    #left_in = k
                 if lst[place][1] == "REGISTER16" and left>0 and left != right:
                         Com.operands[i][count][0][4] = True
                         Com.operands[i][count][1][4] = Com.REGISTER16.index(lst[place][0])
@@ -175,17 +165,8 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                         Com.operands[i][count][1][5] = lst[place][0]
                         count +=1
                         if place == 1:
-                           # print("Error")
                             Com.error_flags.append(i)               #to do twice if there is no user id/label
-                            #print("number")
                             continue
             if left != right:
                     Com.error_flags.append(i)
-                   # print("brackets")
                     return
-
-
-def print_operands():
-    for row in Com.operands:
-        for word in row:
-            print(word)

@@ -15,7 +15,4 @@ def main():
     for i in range(len(Com.lex_table)):
         Gramm.second_pass(Com.lex_table[i], i)
         Gramm.listing(Com.lex_table[i], i)
-    #print(Com.error_flags)
-#print(Com.bytes)
-   # print(Com.lex_table)
 main()
