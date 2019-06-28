@@ -74,7 +74,6 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
         if lst[0][1] == "MNEM":
             count = 0                      #to control shift in operands table
             for place in range(1, len(lst)):
-               
                 if lst[place][0] == ",":
                     count+= 1
                 if count > 1:
@@ -88,7 +87,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                              Com.operands[i][count][2][0] = com
                              error_flag = False
                              break
-                     if error_flag:                         #to check
+                     else:
                          Com.error_flags.append(i)
                          return
                 elif lst[place][1] == "REGISTER8":
@@ -99,7 +98,7 @@ def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analy
                              Com.operands[i][count][2][0] = com
                              error_flag = False
                              break
-                     if error_flag:                 
+                     else:              
                          Com.error_flags.append(i)
                          return
                 #if it contains label or user id (4 column)
