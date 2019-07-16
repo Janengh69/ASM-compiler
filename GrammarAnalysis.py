@@ -2,6 +2,9 @@ import Common as Com
 import math
 
 def shift_count(word, sh):
+    '''
+    Function counts a shift for listing without determing them exactly 
+    '''
     #in the beginnig of macro index
     if len(word) == 1:
         if not(word[0][1].upper() != "SEGMENT" or word[0][0].upper() != "MOVSW" or  word[0][0].upper() != "ENDM" or  word[0][1] != "USER_MACRO"): # in case there is one word in a row and it is not allowed 
@@ -274,6 +277,10 @@ def listing(word, sh):
 
 
 def second_pass(row, sh):
+    '''
+    Function "second pass" determines bytes that will be showed in listing and detects 
+    different common mistakes
+    '''
     number = ""
     byte_number = ""
     if Com.active_segl[sh] == 1 and len(row) == 3:   # counting bytes in data segment 
@@ -662,9 +669,7 @@ def second_pass(row, sh):
                     elif temp.isdigit():
                         temp = int(temp, 10)
                     if int(temp) < 127:
-                        byte_number = 131
-                    #if len(str(temp)) <= 2:
-                    
+                        byte_number = 131                    
                 if Com.operands[sh][0][0][3]:# in case user id 
                     if Com.operands[sh][0][1][3] or Com.operands[sh][0][1][3] == 0:# in case there is no user id in data segment
                         if Com.data[Com.operands[sh][0][1][3]][1][0] == "DW": 

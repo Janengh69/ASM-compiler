@@ -3,6 +3,9 @@ import Common as Com
 import sys
 
 def AsmFileToList(filename): #strip 
+    ''' 
+    Function reads ASM-file and divides it into tokes returned in list called programm
+    '''
     file = open(filename, "r")
     programm = list()
     for line in file:
@@ -35,6 +38,10 @@ def AsmFileToList(filename): #strip
     return programm
 
 def macro_search(lst):
+    '''
+    Fuction searches all macros in ASM-program: macro definition
+    macro calls with and without parameters
+    '''
     count = -1
     macro_flag = False
     for row in range(len(lst)):
@@ -60,7 +67,7 @@ def macro_search(lst):
                 macro_flag = False 
         if macro_flag:
             Com.macro_buf[count].append(lst[row])  # end of macro 
-    #print(Com.macro_buf)
+   # print(Com.macro_buf)
    # print(Com.macro_user)
    # print(Com.macro_param)
 
@@ -74,12 +81,12 @@ def output(list1):
             print(" |", end = '')
         print()
 
-
-
-# if data1 segment, but data ends TO DO: mistakes on all lines
-# text between data and code segment
-
 def list_to_table(lst):
+    '''
+    Fuction accepts a text of programm that is placed in a list and returns 
+    a table that contains each word of program text with description of lexical meaning
+    and len of word 
+    '''
     result = list() 
     user_list = set()
     pos = 0
@@ -251,6 +258,10 @@ def list_to_table(lst):
 
 
 def macro_to_lex(lst):
+    '''
+    Function that makes lexical analysis to macros.
+    Simplified lex_to_table function
+    '''
     result = list() 
     flag = False
     pos = 0

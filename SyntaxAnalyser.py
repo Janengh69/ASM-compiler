@@ -1,5 +1,8 @@
 import Common as Com
 def syntax_check(lex_list):
+    '''
+    Fuction creates a table, which contains every syntax structure and its place in row
+    '''
     table = list()
     pos = 0
     for i in lex_list:
@@ -41,6 +44,9 @@ def syntax_check(lex_list):
     return table
 
 def row_print(i, lex_list, pos):
+    '''
+    Function outputs syntax table in user-friendly way
+    '''
     print(lex_list[pos])
     print('LABELS,ID           MNEM                  1 OPERAND              2 OPERAND      ')
     print('----------------------------------------------------------------------------')
@@ -55,6 +61,10 @@ def row_print(i, lex_list, pos):
 
 
 def instruction_analysis(lst, i, syn): #lst - one row from list in lexical analysis
+    '''
+    Function creates an operand table that shows which operands does mnemonic command has 
+    and exact information about this operands
+    '''
     # 1 - reg
     # 2 - ptr
     # 3 - segment id
